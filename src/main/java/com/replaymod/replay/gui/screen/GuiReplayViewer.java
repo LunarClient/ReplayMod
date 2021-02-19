@@ -471,7 +471,7 @@ public class GuiReplayViewer extends GuiScreen {
                 boolean anyMatches = getListPanel().calcMinSize().getHeight() > 0;
 
                 TextRenderer fontRenderer = getFontRenderer();
-                int filterTextWidth = fontRenderer.getWidth(filter);
+                int filterTextWidth = fontRenderer.getStringWidth(filter);
                 int filterTextHeight = fontRenderer.fontHeight;
                 renderer.drawRect(
                         size.getWidth() - 3 - 2 - filterTextWidth - 2,

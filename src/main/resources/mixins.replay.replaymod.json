@@ -6,7 +6,7 @@
   "server": [],
   "client": [
     //#if MC>=11600
-    "Mixin_MoveRealmsButton",
+    //$$ "Mixin_MoveRealmsButton",
     //#endif
     //#if MC>=11400
     "MixinCamera",

@@ -14,13 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(Mouse.class)
 public abstract class MixinMouseHelper {
     @Shadow
-    private boolean cursorLocked;
+    private boolean isCursorLocked;
 
     @Inject(method = "lockCursor", at = @At("HEAD"), cancellable = true)
     private void noGrab(CallbackInfo ci) {
         // Used to be provided by Forge for 1.12.2 and below
         if (Boolean.valueOf(System.getProperty("fml.noGrab", "false"))) {
-            this.cursorLocked = true;
+            this.isCursorLocked = true;
             ci.cancel();
         }
     }

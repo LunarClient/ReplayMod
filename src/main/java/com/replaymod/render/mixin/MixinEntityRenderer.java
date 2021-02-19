@@ -26,7 +26,7 @@ import net.minecraft.util.hit.HitResult;
 //#if MC>=11400
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.render.WorldRenderer;
 //#else
 //$$ import com.replaymod.replay.camera.CameraEntity;
@@ -38,7 +38,7 @@ import net.minecraft.client.render.WorldRenderer;
 //#endif
 
 //#if MC>=10904
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.RayTraceContext;
 //#else
 //$$ import net.minecraft.util.MovingObjectPosition;
 //#endif
@@ -140,7 +140,7 @@ public abstract class MixinEntityRenderer implements EntityRendererHandler.IEnti
      */
 
     //#if MC>=11500
-    @Inject(method = "method_22973", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getBasicProjectionMatrix", at = @At("RETURN"), cancellable = true)
     private void replayModRender_setupStereoscopicProjection(CallbackInfoReturnable<Matrix4f> ci) {
         if (replayModRender_getHandler() != null) {
             Matrix4f offset;
@@ -217,7 +217,7 @@ public abstract class MixinEntityRenderer implements EntityRendererHandler.IEnti
      */
 
     //#if MC>=11400
-    @Redirect(method = "method_22973", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Matrix4f;viewboxMatrix(DFFF)Lnet/minecraft/util/math/Matrix4f;"))
+    @Redirect(method = "getBasicProjectionMatrix", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/Matrix4f;viewboxMatrix(DFFF)Lnet/minecraft/client/util/math/Matrix4f;"))
     private Matrix4f replayModRender_perspective$0(double fovY, float aspect, float zNear, float zFar) {
         return replayModRender_perspective((float) fovY, aspect, zNear, zFar);
     }

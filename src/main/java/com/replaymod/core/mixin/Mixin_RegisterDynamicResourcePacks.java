@@ -13,19 +13,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.function.Consumer;
 
 //#if MC>=11600
-import net.minecraft.resource.ResourcePackSource;
+//$$ import net.minecraft.resource.ResourcePackSource;
 //#else
-//$$ import java.util.Map;
+import java.util.Map;
 //#endif
 
 @Mixin(ClientBuiltinResourcePackProvider.class)
 public class Mixin_RegisterDynamicResourcePacks {
     @Inject(method = "register", at = @At("RETURN"))
     //#if MC>=11600
-    private void registerReplayMod(Consumer<ResourcePackProfile> consumer, ResourcePackProfile.Factory factory, CallbackInfo ci) {
+    //$$ private void registerReplayMod(Consumer<ResourcePackProfile> consumer, ResourcePackProfile.Factory factory, CallbackInfo ci) {
     //#else
-    //$$ private <T extends ResourcePackProfile> void registerReplayMod(Map<String, T> map, ResourcePackProfile.Factory<T> factory, CallbackInfo ci) {
-    //$$     Consumer<T> consumer = (pack) -> map.put(pack.getName(), pack);
+    private <T extends ResourcePackProfile> void registerReplayMod(Map<String, T> map, ResourcePackProfile.Factory<T> factory, CallbackInfo ci) {
+        Consumer<T> consumer = (pack) -> map.put(pack.getName(), pack);
     //#endif
 
         consumer.accept(ResourcePackProfile.of(
@@ -35,7 +35,7 @@ public class Mixin_RegisterDynamicResourcePacks {
                 factory,
                 ResourcePackProfile.InsertionPosition.BOTTOM
                 //#if MC>=11600
-                , ResourcePackSource.PACK_SOURCE_BUILTIN
+                //$$ , ResourcePackSource.PACK_SOURCE_BUILTIN
                 //#endif
         ));
 
@@ -47,7 +47,7 @@ public class Mixin_RegisterDynamicResourcePacks {
                     factory,
                     ResourcePackProfile.InsertionPosition.BOTTOM
                     //#if MC>=11600
-                    , ResourcePackSource.PACK_SOURCE_BUILTIN
+                    //$$ , ResourcePackSource.PACK_SOURCE_BUILTIN
                     //#endif
             ));
         }

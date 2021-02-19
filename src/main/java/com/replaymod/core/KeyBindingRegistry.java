@@ -182,7 +182,7 @@ public class KeyBindingRegistry extends EventRegistrations {
 
         public boolean isBound() {
             //#if MC>=11400
-            return !keyBinding.isUnbound();
+            return !keyBinding.isNotBound();
             //#else
             //$$ return keyBinding.getKeyCode() != 0;
             //#endif

@@ -10,10 +10,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 
 //#if MC>=11600
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+//$$ import net.minecraft.text.Text;
+//$$ import net.minecraft.text.TranslatableText;
 //#else
-//$$ import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resource.language.I18n;
 //#endif
 
 //#if FABRIC>=1
@@ -64,18 +64,18 @@ public class GuiHandler extends EventRegistrations {
             mod.getReplayHandler().getReplaySender().setReplaySpeed(0);
 
             //#if MC>=11600
-            final TranslatableText BUTTON_OPTIONS = new TranslatableText("menu.options");
-            final TranslatableText BUTTON_EXIT_SERVER = new TranslatableText("menu.disconnect");
-            final TranslatableText BUTTON_ADVANCEMENTS = new TranslatableText("gui.advancements");
-            final TranslatableText BUTTON_STATS = new TranslatableText("gui.stats");
-            final TranslatableText BUTTON_OPEN_TO_LAN = new TranslatableText("menu.shareToLan");
+            //$$ final TranslatableText BUTTON_OPTIONS = new TranslatableText("menu.options");
+            //$$ final TranslatableText BUTTON_EXIT_SERVER = new TranslatableText("menu.disconnect");
+            //$$ final TranslatableText BUTTON_ADVANCEMENTS = new TranslatableText("gui.advancements");
+            //$$ final TranslatableText BUTTON_STATS = new TranslatableText("gui.stats");
+            //$$ final TranslatableText BUTTON_OPEN_TO_LAN = new TranslatableText("menu.shareToLan");
             //#else
             //#if MC>=11400
-            //$$ final String BUTTON_OPTIONS = I18n.translate("menu.options");
-            //$$ final String BUTTON_EXIT_SERVER = I18n.translate("menu.disconnect");
-            //$$ final String BUTTON_ADVANCEMENTS = I18n.translate("gui.advancements");
-            //$$ final String BUTTON_STATS = I18n.translate("gui.stats");
-            //$$ final String BUTTON_OPEN_TO_LAN = I18n.translate("menu.shareToLan");
+            final String BUTTON_OPTIONS = I18n.translate("menu.options");
+            final String BUTTON_EXIT_SERVER = I18n.translate("menu.disconnect");
+            final String BUTTON_ADVANCEMENTS = I18n.translate("gui.advancements");
+            final String BUTTON_STATS = I18n.translate("gui.stats");
+            final String BUTTON_OPEN_TO_LAN = I18n.translate("menu.shareToLan");
             //#else
             //#if MC>=11400
             //$$ final int BUTTON_OPTIONS = 0;
@@ -101,9 +101,9 @@ public class GuiHandler extends EventRegistrations {
                 boolean remove = false;
                 //#if MC>=11400
                 //#if MC>=11600
-                Text id = b.getMessage();
+                //$$ Text id = b.getMessage();
                 //#else
-                //$$ String id = b.getMessage();
+                String id = b.getMessage();
                 //#endif
                 if (id == null) {
                     // likely a button of some third-part mod
@@ -331,9 +331,9 @@ public class GuiHandler extends EventRegistrations {
                     width,
                     height,
                     //#if MC>=11600
-                    new TranslatableText(buttonText)
+                    //$$ new TranslatableText(buttonText)
                     //#else
-                    //$$ I18n.translate(buttonText)
+                    I18n.translate(buttonText)
                     //#endif
                     //#if MC>=11400
                     , self -> onClick.accept((InjectedButton) self)

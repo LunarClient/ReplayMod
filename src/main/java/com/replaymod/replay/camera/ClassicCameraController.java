@@ -34,32 +34,32 @@ public class ClassicCameraController implements CameraController {
         speedup = false;
         for(KeyBinding kb : getMinecraft().options.keysAll) {
             if(!kb.isPressed()) continue;
-            if(kb.getTranslationKey().equals("key.forward")) {
+            if(kb.getId().equals("key.forward")) {
                 forward = true;
                 speedup = true;
             }
 
-            if(kb.getTranslationKey().equals("key.back")) {
+            if(kb.getId().equals("key.back")) {
                 backward = true;
                 speedup = true;
             }
 
-            if(kb.getTranslationKey().equals("key.jump")) {
+            if(kb.getId().equals("key.jump")) {
                 up = true;
                 speedup = true;
             }
 
-            if(kb.getTranslationKey().equals("key.left")) {
+            if(kb.getId().equals("key.left")) {
                 left = true;
                 speedup = true;
             }
 
-            if(kb.getTranslationKey().equals("key.right")) {
+            if(kb.getId().equals("key.right")) {
                 right = true;
                 speedup = true;
             }
 
-            if(kb.getTranslationKey().equals("key.sneak")) {
+            if(kb.getId().equals("key.sneak")) {
                 down = true;
                 speedup = true;
             }
