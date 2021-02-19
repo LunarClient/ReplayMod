@@ -2,18 +2,18 @@ package com.replaymod.replay.camera;
 
 import com.replaymod.replay.ReplayModReplay;
 import com.replaymod.replay.mixin.EntityPlayerAccessor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 
 //#if MC>=11400
-import net.minecraft.entity.EquipmentSlot;
+//$$ import net.minecraft.inventory.EquipmentSlotType;
 //#endif
 
 //#if MC>=11400
 //#else
-//$$ import org.lwjgl.input.Mouse;
+import org.lwjgl.input.Mouse;
 //#endif
 
 import java.util.Arrays;
@@ -29,24 +29,24 @@ public class SpectatorCameraController implements CameraController {
 
     @Override
     public void update(float partialTicksPassed) {
-        MinecraftClient mc = getMinecraft();
-        if (mc.options.keySneak.wasPressed()) {
+        Minecraft mc = getMinecraft();
+        if (mc.gameSettings.keyBindSneak.isPressed()) {
             ReplayModReplay.instance.getReplayHandler().spectateCamera();
         }
 
         // Soak up all remaining key presses
-        for (KeyBinding binding : Arrays.asList(mc.options.keyAttack, mc.options.keyUse,
-                mc.options.keyJump, mc.options.keySneak, mc.options.keyForward,
-                mc.options.keyBack, mc.options.keyLeft, mc.options.keyRight)) {
+        for (KeyBinding binding : Arrays.asList(mc.gameSettings.keyBindAttack, mc.gameSettings.keyBindUseItem,
+                mc.gameSettings.keyBindJump, mc.gameSettings.keyBindSneak, mc.gameSettings.keyBindForward,
+                mc.gameSettings.keyBindBack, mc.gameSettings.keyBindLeft, mc.gameSettings.keyBindRight)) {
             //noinspection StatementWithEmptyBody
-            while (binding.wasPressed());
+            while (binding.isPressed());
         }
 
         // Prevent mouse movement
         //#if MC>=11400
-        // No longer needed
+        //$$ // No longer needed
         //#else
-        //$$ Mouse.updateCursor();
+        Mouse.updateCursor();
         //#endif
 
         // Always make sure the camera is in the exact same spot as the spectated entity
@@ -56,24 +56,24 @@ public class SpectatorCameraController implements CameraController {
         if (view != null && view != camera) {
             camera.setCameraPosRot(getRenderViewEntity(mc));
             // If it's a player, also 'steal' its inventory so the rendering code knows what item to render
-            if (view instanceof PlayerEntity) {
-                PlayerEntity viewPlayer = (PlayerEntity) view;
+            if (view instanceof EntityPlayer) {
+                EntityPlayer viewPlayer = (EntityPlayer) view;
                 //#if MC>=11400
-                camera.equipStack(EquipmentSlot.HEAD, viewPlayer.getEquippedStack(EquipmentSlot.HEAD));
-                camera.equipStack(EquipmentSlot.MAINHAND, viewPlayer.getEquippedStack(EquipmentSlot.MAINHAND));
-                camera.equipStack(EquipmentSlot.OFFHAND, viewPlayer.getEquippedStack(EquipmentSlot.OFFHAND));
+                //$$ camera.setItemStackToSlot(EquipmentSlotType.HEAD, viewPlayer.getItemStackFromSlot(EquipmentSlotType.HEAD));
+                //$$ camera.setItemStackToSlot(EquipmentSlotType.MAINHAND, viewPlayer.getItemStackFromSlot(EquipmentSlotType.MAINHAND));
+                //$$ camera.setItemStackToSlot(EquipmentSlotType.OFFHAND, viewPlayer.getItemStackFromSlot(EquipmentSlotType.OFFHAND));
                 //#else
-                //$$ camera.inventory = viewPlayer.inventory;
+                camera.inventory = viewPlayer.inventory;
                 //#endif
                 EntityPlayerAccessor cameraA = (EntityPlayerAccessor) camera;
                 EntityPlayerAccessor viewPlayerA = (EntityPlayerAccessor) viewPlayer;
                 //#if MC>=10904
-                cameraA.setItemStackMainHand(viewPlayerA.getItemStackMainHand());
-                camera.preferredHand = viewPlayer.preferredHand;
-                cameraA.setActiveItemStackUseCount(viewPlayerA.getActiveItemStackUseCount());
+                //$$ cameraA.setItemStackMainHand(viewPlayerA.getItemStackMainHand());
+                //$$ camera.swingingHand = viewPlayer.swingingHand;
+                //$$ cameraA.setActiveItemStackUseCount(viewPlayerA.getActiveItemStackUseCount());
                 //#else
-                //$$ cameraA.setItemInUse(viewPlayerA.getItemInUse());
-                //$$ cameraA.setItemInUseCount(viewPlayerA.getItemInUseCount());
+                cameraA.setItemInUse(viewPlayerA.getItemInUse());
+                cameraA.setItemInUseCount(viewPlayerA.getItemInUseCount());
                 //#endif
             }
         }

@@ -2,9 +2,9 @@ package com.replaymod.extras.playeroverview.mixin;
 
 import com.replaymod.extras.ReplayModExtras;
 import com.replaymod.extras.playeroverview.PlayerOverview;
-import net.minecraft.client.render.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
@@ -31,15 +31,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * For 1.7.10, that method doesn't exist, so we use a combination of the event and inject into
  */
-@Mixin(value = EntityRenderer.class, priority = 1200)
+@Mixin(value = Render.class, priority = 1200)
 public abstract class MixinRender {
     //#if MC>=10800
     @Inject(method = "shouldRender", at=@At("HEAD"), cancellable = true)
     public void replayModExtras_isPlayerHidden(Entity entity, @Coerce Object camera, double camX, double camY, double camZ, CallbackInfoReturnable<Boolean> ci) {
         ReplayModExtras.instance.get(PlayerOverview.class).ifPresent(playerOverview -> {
-            if (entity instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) entity;
-                if (playerOverview.isHidden(player.getUuid())) {
+            if (entity instanceof EntityPlayer) {
+                EntityPlayer player = (EntityPlayer) entity;
+                if (playerOverview.isHidden(player.getUniqueID())) {
                     ci.setReturnValue(false);
                 }
             }

@@ -10,29 +10,29 @@
     "Mixin_SkipBlockOutlinesDuringRender",
     //#if MC>=10800
     //#if MC>=11500
-    "Mixin_BlockOnChunkRebuilds",
+    //$$ "Mixin_BlockOnChunkRebuilds",
     //#else
-    //$$ "ChunkRenderDispatcherAccessor",
-    //$$ "MixinChunkRenderWorker",
+    "ChunkRenderDispatcherAccessor",
+    "MixinChunkRenderWorker",
     //#endif
     "Mixin_ForceChunkLoading",
     //#endif
     //#if MC>=11400
-    "Mixin_PreserveDepthDuringHandRendering",
-    "Mixin_WindowsWorkaroundForTinyEXRNatives",
-    "MainWindowAccessor",
+    //$$ "Mixin_PreserveDepthDuringHandRendering",
+    //$$ "Mixin_WindowsWorkaroundForTinyEXRNatives",
+    //$$ "MainWindowAccessor",
     //#endif
     "WorldRendererAccessor",
     //#if MC>=10904
-    "MixinParticleManager",
+    //$$ "MixinParticleManager",
     //#else
-    //$$ "MixinEffectRenderer",
-    //$$ "MixinRendererLivingEntity",
+    "MixinEffectRenderer",
+    "MixinRendererLivingEntity",
     //#endif
     "MixinCamera",
     "MixinEntityRenderer",
     //#if MC>=11400
-    "MixinFogRenderer",
+    //$$ "MixinFogRenderer",
     //#endif
     //#if MC>=10800
     "MixinGlStateManager",

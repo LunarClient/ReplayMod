@@ -5,7 +5,7 @@ import com.replaymod.render.blend.data.Serializer;
 //#if MC>=10800
 // FIXME 1.15
 //#if MC<11500
-//$$ import com.replaymod.render.blend.exporters.ChunkExporter;
+import com.replaymod.render.blend.exporters.ChunkExporter;
 //#endif
 import com.replaymod.render.blend.exporters.EntityExporter;
 import com.replaymod.render.blend.exporters.ItemExporter;
@@ -13,9 +13,9 @@ import com.replaymod.render.blend.exporters.ParticlesExporter;
 import com.replaymod.render.blend.exporters.RenderState;
 import com.replaymod.render.blend.exporters.TileEntityExporter;
 //#endif
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.crash.CrashException;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.util.ReportedException;
 import org.apache.commons.io.output.NullOutputStream;
 import org.blender.utils.BlenderFactory;
 import org.cakelab.blender.io.BlenderFile;
@@ -58,7 +58,7 @@ public class BlendState implements Exporter {
         register(renderState);
         // FIXME 1.15
         //#if MC<11500
-        //$$ register(new ChunkExporter());
+        register(new ChunkExporter());
         //#endif
         register(new EntityExporter(renderState));
         register(new TileEntityExporter(renderState));
@@ -86,10 +86,10 @@ public class BlendState implements Exporter {
             try {
                 exporter.setup();
             } catch (IOException e) {
-                CrashReport report = CrashReport.create(e, "Setup of blend exporter");
-                CrashReportSection category = report.addElement("Exporter");
+                CrashReport report = CrashReport.makeCrashReport(e, "Setup of blend exporter");
+                CrashReportCategory category = report.makeCategory("Exporter");
                 addDetail(category, "Exporter", exporter::toString);
-                throw new CrashException(report);
+                throw new ReportedException(report);
             }
         }
     }
@@ -100,10 +100,10 @@ public class BlendState implements Exporter {
             try {
                 exporter.tearDown();
             } catch (IOException e) {
-                CrashReport report = CrashReport.create(e, "Tear down of blend exporter");
-                CrashReportSection category = report.addElement("Exporter");
+                CrashReport report = CrashReport.makeCrashReport(e, "Tear down of blend exporter");
+                CrashReportCategory category = report.makeCategory("Exporter");
                 addDetail(category, "Exporter", exporter::toString);
-                throw new CrashException(report);
+                throw new ReportedException(report);
             }
         }
 
@@ -137,11 +137,11 @@ public class BlendState implements Exporter {
             try {
             exporter.preFrame(frame);
             } catch (IOException e) {
-                CrashReport report = CrashReport.create(e, "Pre frame of blend exporter");
-                CrashReportSection category = report.addElement("Exporter");
+                CrashReport report = CrashReport.makeCrashReport(e, "Pre frame of blend exporter");
+                CrashReportCategory category = report.makeCategory("Exporter");
                 addDetail(category, "Exporter", exporter::toString);
                 addDetail(category, "Frame", () -> String.valueOf(frame));
-                throw new CrashException(report);
+                throw new ReportedException(report);
             }
         }
     }
@@ -152,11 +152,11 @@ public class BlendState implements Exporter {
             try {
                 exporter.postFrame(frame);
             } catch (IOException e) {
-                CrashReport report = CrashReport.create(e, "Post frame of blend exporter");
-                CrashReportSection category = report.addElement("Exporter");
+                CrashReport report = CrashReport.makeCrashReport(e, "Post frame of blend exporter");
+                CrashReportCategory category = report.makeCategory("Exporter");
                 addDetail(category, "Exporter", exporter::toString);
                 addDetail(category, "Frame", () -> String.valueOf(frame));
-                throw new CrashException(report);
+                throw new ReportedException(report);
             }
         }
 

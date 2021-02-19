@@ -22,9 +22,9 @@ import com.replaymod.replaystudio.replay.ReplayFile;
 import com.replaymod.simplepathing.SPTimeline.SPPath;
 import com.replaymod.simplepathing.gui.GuiPathing;
 import com.replaymod.simplepathing.preview.PathPreview;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashException;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.util.ReportedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,9 +116,9 @@ public class ReplayModSimplePathing extends EventRegistrations implements Module
             }
         }, true);
         core.getKeyBindingRegistry().registerRaw(Keyboard.KEY_Z, () -> {
-            if (Screen.hasControlDown() && currentTimeline != null) {
+            if (GuiScreen.isCtrlKeyDown() && currentTimeline != null) {
                 Timeline timeline = currentTimeline.getTimeline();
-                if (Screen.hasShiftDown()) {
+                if (GuiScreen.isShiftKeyDown()) {
                     if (timeline.peekRedoStack() != null) {
                         timeline.redoLastChange();
                     }
@@ -132,7 +132,7 @@ public class ReplayModSimplePathing extends EventRegistrations implements Module
             return false;
         });
         core.getKeyBindingRegistry().registerRaw(Keyboard.KEY_Y, () -> {
-            if (Screen.hasControlDown() && currentTimeline != null) {
+            if (GuiScreen.isCtrlKeyDown() && currentTimeline != null) {
                 Timeline timeline = currentTimeline.getTimeline();
                 if (timeline.peekRedoStack() != null) {
                     timeline.redoLastChange();
@@ -156,7 +156,7 @@ public class ReplayModSimplePathing extends EventRegistrations implements Module
                 }
             }
         } catch (IOException e) {
-            throw new CrashException(CrashReport.create(e, "Reading timeline"));
+            throw new ReportedException(CrashReport.makeCrashReport(e, "Reading timeline"));
         }
 
         guiPathing = new GuiPathing(core, this, replayHandler);
@@ -275,8 +275,8 @@ public class ReplayModSimplePathing extends EventRegistrations implements Module
             String serialized = serialization.serialize(Collections.singletonMap("", spTimeline.getTimeline()));
             timeline = serialization.deserialize(serialized).get("");
         } catch (Throwable t) {
-            CrashReport report = CrashReport.create(t, "Cloning timeline");
-            throw new CrashException(report);
+            CrashReport report = CrashReport.makeCrashReport(t, "Cloning timeline");
+            throw new ReportedException(report);
         }
 
         int id = lastSaveId.incrementAndGet();

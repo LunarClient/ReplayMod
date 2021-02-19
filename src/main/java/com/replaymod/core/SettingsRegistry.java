@@ -9,15 +9,15 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 //#if MC>=11400
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+//$$ import com.google.gson.Gson;
+//$$ import com.google.gson.GsonBuilder;
+//$$ import com.google.gson.JsonElement;
+//$$ import com.google.gson.JsonObject;
+//$$ import com.google.gson.JsonPrimitive;
+//$$ import java.io.IOException;
+//$$ import java.nio.charset.StandardCharsets;
+//$$ import java.nio.file.Files;
+//$$ import java.nio.file.Path;
 //#else
 //#if MC>=11400
 //$$ import net.minecraftforge.common.ForgeConfigSpec;
@@ -25,7 +25,7 @@ import java.nio.file.Path;
 //$$ import net.minecraftforge.fml.config.ModConfig;
 //$$ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 //#else
-//$$ import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Configuration;
 //#endif
 //#endif
 
@@ -35,60 +35,60 @@ public class SettingsRegistry {
     private static Logger LOGGER = LogManager.getLogger();
     private Map<SettingKey<?>, Object> settings = Collections.synchronizedMap(new LinkedHashMap<>());
     //#if MC>=11400
-    private final Path configFile = getMinecraft().runDirectory.toPath().resolve("config/replaymod.json");
+    //$$ private final Path configFile = getMinecraft().gameDir.toPath().resolve("config/replaymod.json");
     //#else
-    //$$ private static final Object NULL_OBJECT = new Object();
+    private static final Object NULL_OBJECT = new Object();
     //#if MC>=11400
     //$$ private ForgeConfigSpec spec;
     //$$ private ModConfig config;
     //#else
-    //$$ private Configuration configuration;
+    private Configuration configuration;
     //#endif
     //#endif
 
     //#if MC>=11400
-    public void register() {
-        String config;
-        if (Files.exists(configFile)) {
-            try {
-                config = new String(Files.readAllBytes(configFile), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-        } else {
-            save();
-            return;
-        }
-        Gson gson = new Gson();
-        JsonObject root = gson.fromJson(config, JsonObject.class);
-        if (root == null) {
-            LOGGER.error("Config file {} appears corrupted: {}", configFile, config);
-            save();
-            return;
-        }
-        for (Map.Entry<SettingKey<?>, Object> entry : settings.entrySet()) {
-            SettingKey<?> key = entry.getKey();
-            JsonElement category = root.get(key.getCategory());
-            if (category != null && category.isJsonObject()) {
-                JsonElement valueElem = category.getAsJsonObject().get(key.getKey());
-                if (valueElem == null || !valueElem.isJsonPrimitive()) continue;
-                JsonPrimitive value = valueElem.getAsJsonPrimitive();
-                if (key.getDefault() instanceof Boolean && value.isBoolean()) {
-                    entry.setValue(value.getAsBoolean());
-                }
-                if (key.getDefault() instanceof Integer && value.isNumber()) {
-                    entry.setValue(value.getAsNumber().intValue());
-                }
-                if (key.getDefault() instanceof Double && value.isNumber()) {
-                    entry.setValue(value.getAsNumber().doubleValue());
-                }
-                if (key.getDefault() instanceof String && value.isString()) {
-                    entry.setValue(value.getAsString());
-                }
-            }
-        }
-    }
+    //$$ public void register() {
+    //$$     String config;
+    //$$     if (Files.exists(configFile)) {
+    //$$         try {
+    //$$             config = new String(Files.readAllBytes(configFile), StandardCharsets.UTF_8);
+    //$$         } catch (IOException e) {
+    //$$             e.printStackTrace();
+    //$$             return;
+    //$$         }
+    //$$     } else {
+    //$$         save();
+    //$$         return;
+    //$$     }
+    //$$     Gson gson = new Gson();
+    //$$     JsonObject root = gson.fromJson(config, JsonObject.class);
+    //$$     if (root == null) {
+    //$$         LOGGER.error("Config file {} appears corrupted: {}", configFile, config);
+    //$$         save();
+    //$$         return;
+    //$$     }
+    //$$     for (Map.Entry<SettingKey<?>, Object> entry : settings.entrySet()) {
+    //$$         SettingKey<?> key = entry.getKey();
+    //$$         JsonElement category = root.get(key.getCategory());
+    //$$         if (category != null && category.isJsonObject()) {
+    //$$             JsonElement valueElem = category.getAsJsonObject().get(key.getKey());
+    //$$             if (valueElem == null || !valueElem.isJsonPrimitive()) continue;
+    //$$             JsonPrimitive value = valueElem.getAsJsonPrimitive();
+    //$$             if (key.getDefault() instanceof Boolean && value.isBoolean()) {
+    //$$                 entry.setValue(value.getAsBoolean());
+    //$$             }
+    //$$             if (key.getDefault() instanceof Integer && value.isNumber()) {
+    //$$                 entry.setValue(value.getAsNumber().intValue());
+    //$$             }
+    //$$             if (key.getDefault() instanceof Double && value.isNumber()) {
+    //$$                 entry.setValue(value.getAsNumber().doubleValue());
+    //$$             }
+    //$$             if (key.getDefault() instanceof String && value.isString()) {
+    //$$                 entry.setValue(value.getAsString());
+    //$$             }
+    //$$         }
+    //$$     }
+    //$$ }
     //#else
     //#if MC>=11400
     //$$ public void register() {
@@ -114,15 +114,15 @@ public class SettingsRegistry {
     //$$     }
     //$$ }
     //#else
-    //$$ public void setConfiguration(Configuration configuration) {
-    //$$     this.configuration = configuration;
-    //$$
-    //$$     List<SettingKey<?>> keys = new ArrayList<>(settings.keySet());
-    //$$     settings.clear();
-    //$$     for (SettingKey key : keys) {
-    //$$         register(key);
-    //$$     }
-    //$$ }
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+
+        List<SettingKey<?>> keys = new ArrayList<>(settings.keySet());
+        settings.clear();
+        for (SettingKey key : keys) {
+            register(key);
+        }
+    }
     //#endif
     //#endif
 
@@ -141,7 +141,7 @@ public class SettingsRegistry {
 
     public void register(SettingKey<?> key) {
         //#if MC>=11400
-        settings.put(key, key.getDefault());
+        //$$ settings.put(key, key.getDefault());
         //#else
         //#if MC>=11400
         //$$ if (spec != null) {
@@ -149,23 +149,23 @@ public class SettingsRegistry {
         //$$ }
         //$$ settings.put(key, NULL_OBJECT);
         //#else
-        //$$ Object value;
-        //$$ if (configuration != null) {
-        //$$     if (key.getDefault() instanceof Boolean) {
-        //$$         value = configuration.get(key.getCategory(), key.getKey(), (Boolean) key.getDefault()).getBoolean();
-        //$$     } else if (key.getDefault() instanceof Integer) {
-        //$$         value = configuration.get(key.getCategory(), key.getKey(), (Integer) key.getDefault()).getInt();
-        //$$     } else if (key.getDefault() instanceof Double) {
-        //$$         value = configuration.get(key.getCategory(), key.getKey(), (Double) key.getDefault()).getDouble();
-        //$$     } else if (key.getDefault() instanceof String) {
-        //$$         value = configuration.get(key.getCategory(), key.getKey(), (String) key.getDefault()).getString();
-        //$$     } else {
-        //$$         throw new IllegalArgumentException("Default type " + key.getDefault().getClass() + " not supported.");
-        //$$     }
-        //$$ } else {
-        //$$     value = NULL_OBJECT;
-        //$$ }
-        //$$ settings.put(key, value);
+        Object value;
+        if (configuration != null) {
+            if (key.getDefault() instanceof Boolean) {
+                value = configuration.get(key.getCategory(), key.getKey(), (Boolean) key.getDefault()).getBoolean();
+            } else if (key.getDefault() instanceof Integer) {
+                value = configuration.get(key.getCategory(), key.getKey(), (Integer) key.getDefault()).getInt();
+            } else if (key.getDefault() instanceof Double) {
+                value = configuration.get(key.getCategory(), key.getKey(), (Double) key.getDefault()).getDouble();
+            } else if (key.getDefault() instanceof String) {
+                value = configuration.get(key.getCategory(), key.getKey(), (String) key.getDefault()).getString();
+            } else {
+                throw new IllegalArgumentException("Default type " + key.getDefault().getClass() + " not supported.");
+            }
+        } else {
+            value = NULL_OBJECT;
+        }
+        settings.put(key, value);
         //#endif
         //#endif
     }
@@ -189,17 +189,17 @@ public class SettingsRegistry {
         //$$     config.getConfigData().set(key.getCategory() + "." + key.getKey(), value);
         //$$ }
         //#else
-        //$$ if (key.getDefault() instanceof Boolean) {
-        //$$     configuration.get(key.getCategory(), key.getKey(), (Boolean) key.getDefault()).set((Boolean) value);
-        //$$ } else if (key.getDefault() instanceof Integer) {
-        //$$     configuration.get(key.getCategory(), key.getKey(), (Integer) key.getDefault()).set((Integer) value);
-        //$$ } else if (key.getDefault() instanceof Double) {
-        //$$     configuration.get(key.getCategory(), key.getKey(), (Double) key.getDefault()).set((Double) value);
-        //$$ } else if (key.getDefault() instanceof String) {
-        //$$     configuration.get(key.getCategory(), key.getKey(), (String) key.getDefault()).set((String) value);
-        //$$ } else {
-        //$$     throw new IllegalArgumentException("Default type " + key.getDefault().getClass() + " not supported.");
-        //$$ }
+        if (key.getDefault() instanceof Boolean) {
+            configuration.get(key.getCategory(), key.getKey(), (Boolean) key.getDefault()).set((Boolean) value);
+        } else if (key.getDefault() instanceof Integer) {
+            configuration.get(key.getCategory(), key.getKey(), (Integer) key.getDefault()).set((Integer) value);
+        } else if (key.getDefault() instanceof Double) {
+            configuration.get(key.getCategory(), key.getKey(), (Double) key.getDefault()).set((Double) value);
+        } else if (key.getDefault() instanceof String) {
+            configuration.get(key.getCategory(), key.getKey(), (String) key.getDefault()).set((String) value);
+        } else {
+            throw new IllegalArgumentException("Default type " + key.getDefault().getClass() + " not supported.");
+        }
         //#endif
         //#endif
         settings.put(key, value);
@@ -208,41 +208,41 @@ public class SettingsRegistry {
 
     public void save() {
         //#if MC>=11400
-        JsonObject root = new JsonObject();
-        for (Map.Entry<SettingKey<?>, Object> entry : settings.entrySet()) {
-            SettingKey<?> key = entry.getKey();
-            JsonObject category = root.getAsJsonObject(key.getCategory());
-            if (category == null) {
-                category = new JsonObject();
-                root.add(key.getCategory(), category);
-            }
-
-            Object value = entry.getValue();
-            if (value instanceof Boolean) {
-                category.addProperty(key.getKey(), (Boolean) value);
-            }
-            if (value instanceof Number) {
-                category.addProperty(key.getKey(), (Number) value);
-            }
-            if (value instanceof String) {
-                category.addProperty(key.getKey(), (String) value);
-            }
-        }
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String config = gson.toJson(root);
-        try {
-            Files.createDirectories(configFile.getParent());
-            Files.write(configFile, config.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //$$ JsonObject root = new JsonObject();
+        //$$ for (Map.Entry<SettingKey<?>, Object> entry : settings.entrySet()) {
+        //$$     SettingKey<?> key = entry.getKey();
+        //$$     JsonObject category = root.getAsJsonObject(key.getCategory());
+        //$$     if (category == null) {
+        //$$         category = new JsonObject();
+        //$$         root.add(key.getCategory(), category);
+        //$$     }
+        //$$
+        //$$     Object value = entry.getValue();
+        //$$     if (value instanceof Boolean) {
+        //$$         category.addProperty(key.getKey(), (Boolean) value);
+        //$$     }
+        //$$     if (value instanceof Number) {
+        //$$         category.addProperty(key.getKey(), (Number) value);
+        //$$     }
+        //$$     if (value instanceof String) {
+        //$$         category.addProperty(key.getKey(), (String) value);
+        //$$     }
+        //$$ }
+        //$$ Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        //$$ String config = gson.toJson(root);
+        //$$ try {
+        //$$     Files.createDirectories(configFile.getParent());
+        //$$     Files.write(configFile, config.getBytes(StandardCharsets.UTF_8));
+        //$$ } catch (IOException e) {
+        //$$     e.printStackTrace();
+        //$$ }
         //#else
         //#if MC>=11400
         //$$ if (config != null) {
         //$$     config.save();
         //$$ }
         //#else
-        //$$ configuration.save();
+        configuration.save();
         //#endif
         //#endif
     }

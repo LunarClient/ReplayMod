@@ -2,21 +2,21 @@
 package com.replaymod.replay.mixin;
 
 import com.replaymod.replay.ReplayModReplay;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.ArrowEntityRenderer;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderArrow;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 
 //#if MC>=11500
-import net.minecraft.client.render.Frustum;
+//$$ import net.minecraft.client.render.Frustum;
 //#else
-//$$ import net.minecraft.client.render.VisibleRegion;
+import net.minecraft.client.renderer.culling.ICamera;
 //#endif
 
-@Mixin(ArrowEntityRenderer.class)
-public abstract class MixinRenderArrow extends EntityRenderer {
-    protected MixinRenderArrow(EntityRenderDispatcher renderManager) {
+@Mixin(RenderArrow.class)
+public abstract class MixinRenderArrow extends Render {
+    protected MixinRenderArrow(RenderManager renderManager) {
         super(renderManager);
     }
 
@@ -24,9 +24,9 @@ public abstract class MixinRenderArrow extends EntityRenderer {
     @Override
     public boolean shouldRender(Entity entity,
                                 //#if MC>=11500
-                                Frustum camera,
+                                //$$ Frustum camera,
                                 //#else
-                                //$$ VisibleRegion camera,
+                                ICamera camera,
                                 //#endif
                                 double camX, double camY, double camZ) {
         // Force arrows to always render, otherwise they stop rendering when you get close to them

@@ -7,12 +7,12 @@ import com.replaymod.render.capturer.RenderInfo;
 import com.replaymod.render.rendering.Pipelines;
 import de.johni0702.minecraft.gui.utils.lwjgl.Dimension;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadableDimension;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.client.Minecraft;
+import net.minecraft.crash.CrashReport;
 
 //#if MC>=11400
-import com.replaymod.render.mixin.MainWindowAccessor;
-import static com.replaymod.core.versions.MCVer.getWindow;
+//$$ import com.replaymod.render.mixin.MainWindowAccessor;
+//$$ import static com.replaymod.core.versions.MCVer.getWindow;
 //#endif
 
 //#if MC>=10800
@@ -23,7 +23,7 @@ import static com.replaymod.core.versions.MCVer.getRenderPartialTicks;
 
 public class ScreenshotRenderer implements RenderInfo {
 
-    private final MinecraftClient mc = MCVer.getMinecraft();
+    private final Minecraft mc = MCVer.getMinecraft();
 
     private final RenderSettings settings;
 
@@ -36,18 +36,18 @@ public class ScreenshotRenderer implements RenderInfo {
     public boolean renderScreenshot() throws Throwable {
         try {
             //#if MC>=11400
-            int displayWidthBefore = getWindow(mc).getFramebufferWidth();
-            int displayHeightBefore = getWindow(mc).getFramebufferHeight();
+            //$$ int displayWidthBefore = getWindow(mc).getFramebufferWidth();
+            //$$ int displayHeightBefore = getWindow(mc).getFramebufferHeight();
             //#else
-            //$$ int displayWidthBefore = mc.displayWidth;
-            //$$ int displayHeightBefore = mc.displayHeight;
+            int displayWidthBefore = mc.displayWidth;
+            int displayHeightBefore = mc.displayHeight;
             //#endif
 
-            boolean hideGUIBefore = mc.options.hudHidden;
-            mc.options.hudHidden = true;
+            boolean hideGUIBefore = mc.gameSettings.hideGUI;
+            mc.gameSettings.hideGUI = true;
 
             //#if MC>=10800
-            ChunkLoadingRenderGlobal clrg = new ChunkLoadingRenderGlobal(mc.worldRenderer);
+            ChunkLoadingRenderGlobal clrg = new ChunkLoadingRenderGlobal(mc.renderGlobal);
             //#endif
 
             if (settings.getRenderMethod() == RenderSettings.RenderMethod.BLEND) {
@@ -62,28 +62,28 @@ public class ScreenshotRenderer implements RenderInfo {
             clrg.uninstall();
             //#endif
 
-            mc.options.hudHidden = hideGUIBefore;
+            mc.gameSettings.hideGUI = hideGUIBefore;
             //#if MC>=11400
-            //noinspection ConstantConditions
-            MainWindowAccessor acc = (MainWindowAccessor) (Object) getWindow(mc);
-            acc.setFramebufferWidth(displayWidthBefore);
-            acc.setFramebufferHeight(displayHeightBefore);
-            mc.getFramebuffer().resize(displayWidthBefore, displayHeightBefore
+            //$$ //noinspection ConstantConditions
+            //$$ MainWindowAccessor acc = (MainWindowAccessor) (Object) getWindow(mc);
+            //$$ acc.setFramebufferWidth(displayWidthBefore);
+            //$$ acc.setFramebufferHeight(displayHeightBefore);
+            //$$ mc.getFramebuffer().func_216491_a(displayWidthBefore, displayHeightBefore
                     //#if MC>=11400
-                    , false
+                    //$$ , false
                     //#endif
-            );
+            //$$ );
             //#if MC>=11500
-            mc.gameRenderer.onResized(displayWidthBefore, displayHeightBefore);
+            //$$ mc.gameRenderer.onResized(displayWidthBefore, displayHeightBefore);
             //#endif
             //#else
-            //$$ mc.resize(displayWidthBefore, displayHeightBefore);
+            mc.resize(displayWidthBefore, displayHeightBefore);
             //#endif
             return true;
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
-            CrashReport report = CrashReport.create(e, "Creating Equirectangular Screenshot");
-            MCVer.getMinecraft().setCrashReport(report);
+            CrashReport report = CrashReport.makeCrashReport(e, "Creating Equirectangular Screenshot");
+            MCVer.getMinecraft().crashed(report);
         }
         return false;
     }

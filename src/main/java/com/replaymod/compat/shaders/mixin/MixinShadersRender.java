@@ -1,6 +1,6 @@
 package com.replaymod.compat.shaders.mixin;
 
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //#endif
 
 //#if MC>=11400
-import com.replaymod.core.events.PreRenderHandCallback;
+//$$ import com.replaymod.core.events.PreRenderHandCallback;
 //#else
-//$$ import com.replaymod.core.versions.MCVer;
-//$$ import net.minecraftforge.client.ForgeHooksClient;
+import com.replaymod.core.versions.MCVer;
+import net.minecraftforge.client.ForgeHooksClient;
 //#endif
 
 @Pseudo
@@ -28,7 +28,7 @@ public abstract class MixinShadersRender {
 
     @Inject(method = { "renderHand0", "renderHand1" }, at = @At("HEAD"), cancellable = true, remap = false)
     private static void replayModCompat_disableRenderHand0(
-            GameRenderer er,
+            EntityRenderer er,
             //#if MC>=11600
             //$$ MatrixStack stack,
             //$$ Camera camera,
@@ -39,12 +39,12 @@ public abstract class MixinShadersRender {
             //#endif
             CallbackInfo ci) {
         //#if MC>=11400
-        if (PreRenderHandCallback.EVENT.invoker().preRenderHand()) {
+        //$$ if (PreRenderHandCallback.EVENT.invoker().preRenderHand()) {
         //#else
         //#if MC>=11400
         //$$ if (ForgeHooksClient.renderFirstPersonHand(MCVer.getMinecraft().renderGlobal, partialTicks)) {
         //#else
-        //$$ if (ForgeHooksClient.renderFirstPersonHand(MCVer.getMinecraft().renderGlobal, partialTicks, renderPass)) {
+        if (ForgeHooksClient.renderFirstPersonHand(MCVer.getMinecraft().renderGlobal, partialTicks, renderPass)) {
         //#endif
         //#endif
             ci.cancel();

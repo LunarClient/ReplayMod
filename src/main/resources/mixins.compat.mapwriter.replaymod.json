@@ -5,7 +5,7 @@
   "server": [],
   "client": [
     //#if MC<11400
-    //$$ "MixinMinecraft"
+    "MixinMinecraft"
     //#endif
   ],
   "compatibilityLevel": "JAVA_8",

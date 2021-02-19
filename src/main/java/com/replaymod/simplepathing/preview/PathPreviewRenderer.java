@@ -16,24 +16,24 @@ import com.replaymod.simplepathing.ReplayModSimplePathing;
 import com.replaymod.simplepathing.SPTimeline;
 import com.replaymod.simplepathing.gui.GuiPathing;
 import de.johni0702.minecraft.gui.utils.EventRegistrations;
-import net.minecraft.client.MinecraftClient;
-import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.lwjgl.opengl.GL11;
 
 //#if MC>=11500
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.util.math.MatrixStack;
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
+//$$ import net.minecraft.client.util.math.MatrixStack;
 //#endif
 
 //#if FABRIC>=1
-import com.replaymod.core.events.PostRenderWorldCallback;
+//$$ import com.replaymod.core.events.PostRenderWorldCallback;
 //#else
-//$$ import net.minecraftforge.client.event.RenderWorldLastEvent;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 //#endif
 
 import java.util.Comparator;
@@ -43,8 +43,8 @@ import static com.replaymod.core.ReplayMod.TEXTURE;
 import static com.replaymod.core.versions.MCVer.*;
 
 public class PathPreviewRenderer extends EventRegistrations {
-    private static final Identifier CAMERA_HEAD = new Identifier("replaymod", "camera_head.png");
-    private static final MinecraftClient mc = MCVer.getMinecraft();
+    private static final ResourceLocation CAMERA_HEAD = new ResourceLocation("replaymod", "camera_head.png");
+    private static final Minecraft mc = MCVer.getMinecraft();
 
     private static final int SLOW_PATH_COLOR = 0xffcccc;
     private static final int FAST_PATH_COLOR = 0x660000;
@@ -59,17 +59,17 @@ public class PathPreviewRenderer extends EventRegistrations {
     }
 
     //#if FABRIC>=1
-    { on(PostRenderWorldCallback.EVENT, this::renderCameraPath); }
+    //$$ { on(PostRenderWorldCallback.EVENT, this::renderCameraPath); }
     //#if MC>=11500
-    private void renderCameraPath(MatrixStack matrixStack) {
+    //$$ private void renderCameraPath(MatrixStack matrixStack) {
     //#else
     //$$ private void renderCameraPath() {
     //#endif
     //#else
-    //$$ @SubscribeEvent
-    //$$ public void renderCameraPath(RenderWorldLastEvent event) {
+    @SubscribeEvent
+    public void renderCameraPath(RenderWorldLastEvent event) {
     //#endif
-        if (!replayHandler.getReplaySender().isAsyncMode() || mc.options.hudHidden) return;
+        if (!replayHandler.getReplaySender().isAsyncMode() || mc.gameSettings.hideGUI) return;
 
         Entity view = getRenderViewEntity(mc);
         if (view == null) return;
@@ -86,16 +86,16 @@ public class PathPreviewRenderer extends EventRegistrations {
 
         path.update();
 
-        int renderDistance = mc.options.viewDistance * 16;
+        int renderDistance = mc.gameSettings.renderDistanceChunks * 16;
         int renderDistanceSquared = renderDistance * renderDistance;
 
         Triple<Double, Double, Double> viewPos = Triple.of(
                 Entity_getX(view),
                 //#if MC>=10800 && MC<11500
-                //$$ // Eye height is subtracted to make path appear higher (at eye height) than it actually is (at foot height)
-                //$$ Entity_getY(view) - view.getStandingEyeHeight(),
+                // Eye height is subtracted to make path appear higher (at eye height) than it actually is (at foot height)
+                Entity_getY(view) - view.getEyeHeight(),
                 //#else
-                Entity_getY(view),
+                //$$ Entity_getY(view),
                 //#endif
                 Entity_getZ(view)
         );
@@ -107,7 +107,7 @@ public class PathPreviewRenderer extends EventRegistrations {
             GL11.glDisable(GL11.GL_TEXTURE_2D);
 
             //#if MC>=11500
-            RenderSystem.multMatrix(matrixStack.peek().getModel());
+            //$$ RenderSystem.multMatrix(matrixStack.peek().getModel());
             //#endif
 
             for (PathSegment segment : path.getSegments()) {
@@ -199,7 +199,7 @@ public class PathPreviewRenderer extends EventRegistrations {
             }
         } finally {
             GL11.glPopMatrix();
-            GlStateManager.popAttributes();
+            GlStateManager.popAttrib();
         }
     }
 
@@ -291,11 +291,11 @@ public class PathPreviewRenderer extends EventRegistrations {
         );
         GL11.glNormal3f(0, 1, 0);
         //#if MC>=11500
-        GL11.glRotatef(-getRenderManager().camera.getYaw(), 0, 1, 0);
-        GL11.glRotatef(getRenderManager().camera.getPitch(), 1, 0, 0);
+        //$$ GL11.glRotatef(-getRenderManager().camera.getYaw(), 0, 1, 0);
+        //$$ GL11.glRotatef(getRenderManager().camera.getPitch(), 1, 0, 0);
         //#else
-        //$$ GL11.glRotatef(-getRenderManager().cameraYaw, 0, 1, 0);
-        //$$ GL11.glRotatef(getRenderManager().cameraPitch, 1, 0, 0);
+        GL11.glRotatef(-getRenderManager().playerViewY, 0, 1, 0);
+        GL11.glRotatef(getRenderManager().playerViewX, 1, 0, 0);
         //#endif
 
         Tessellator_getInstance().draw();

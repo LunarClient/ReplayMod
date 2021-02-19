@@ -1,28 +1,28 @@
 package com.replaymod.replay.mixin;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EntityLivingBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(LivingEntity.class)
+@Mixin(EntityLivingBase.class)
 public interface EntityLivingBaseAccessor {
     //#if MC>=11400
-    @Accessor("serverX")
-    double getInterpTargetX();
-    @Accessor("serverY")
-    double getInterpTargetY();
-    @Accessor("serverZ")
-    double getInterpTargetZ();
-    @Accessor("serverYaw")
-    double getInterpTargetYaw();
-    @Accessor("serverPitch")
-    double getInterpTargetPitch();
+    //$$ @Accessor
+    //$$ double getInterpTargetX();
+    //$$ @Accessor
+    //$$ double getInterpTargetY();
+    //$$ @Accessor
+    //$$ double getInterpTargetZ();
+    //$$ @Accessor
+    //$$ double getInterpTargetYaw();
+    //$$ @Accessor
+    //$$ double getInterpTargetPitch();
     //#endif
 
     //#if MC>=10904
-    @Accessor("itemUseTimeLeft")
-    int getActiveItemStackUseCount();
-    @Accessor("itemUseTimeLeft")
-    void setActiveItemStackUseCount(int value);
+    //$$ @Accessor
+    //$$ int getActiveItemStackUseCount();
+    //$$ @Accessor
+    //$$ void setActiveItemStackUseCount(int value);
     //#endif
 }

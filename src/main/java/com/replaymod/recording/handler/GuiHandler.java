@@ -14,21 +14,21 @@ import de.johni0702.minecraft.gui.element.GuiToggleButton;
 import de.johni0702.minecraft.gui.layout.CustomLayout;
 import de.johni0702.minecraft.gui.popup.GuiInfoPopup;
 import de.johni0702.minecraft.gui.utils.EventRegistrations;
-import net.minecraft.client.gui.screen.AddServerScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.gui.GuiScreenAddServer;
+import net.minecraft.client.gui.GuiMultiplayer;
+import net.minecraft.client.gui.GuiSelectWorld;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.resources.I18n;
 
 //#if FABRIC>=1
-import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
-import net.minecraft.client.gui.screen.Screen;
+//$$ import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
+//$$ import net.minecraft.client.gui.screen.Screen;
 //#else
-//$$ import net.minecraftforge.client.event.GuiScreenEvent;
-//$$ import net.minecraftforge.common.MinecraftForge;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
-//$$
-//$$ import static com.replaymod.core.versions.MCVer.getGui;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import static com.replaymod.core.versions.MCVer.getGui;
 //#endif
 
 public class GuiHandler extends EventRegistrations {
@@ -40,15 +40,15 @@ public class GuiHandler extends EventRegistrations {
     }
 
     //#if FABRIC>=1
-    { on(InitScreenCallback.EVENT, (screen, buttons) -> onGuiInit(screen)); }
-    private void onGuiInit(Screen gui) {
+    //$$ { on(InitScreenCallback.EVENT, (screen, buttons) -> onGuiInit(screen)); }
+    //$$ private void onGuiInit(Screen gui) {
     //#else
-    //$$ @SubscribeEvent
-    //$$ public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
-    //$$     net.minecraft.client.gui.screen.Screen gui = getGui(event);
+    @SubscribeEvent
+    public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
+        net.minecraft.client.gui.GuiScreen gui = getGui(event);
     //#endif
-        if (gui instanceof SelectWorldScreen || gui instanceof MultiplayerScreen) {
-            boolean sp = gui instanceof SelectWorldScreen;
+        if (gui instanceof GuiSelectWorld || gui instanceof GuiMultiplayer) {
+            boolean sp = gui instanceof GuiSelectWorld;
             SettingsRegistry settingsRegistry = mod.getSettingsRegistry();
             Setting<Boolean> setting = sp ? Setting.RECORD_SINGLEPLAYER : Setting.RECORD_SERVER;
 
@@ -70,18 +70,18 @@ public class GuiHandler extends EventRegistrations {
             }).addElements(null, recordingCheckbox);
         }
 
-        if (gui instanceof AddServerScreen) {
+        if (gui instanceof GuiScreenAddServer) {
             VanillaGuiScreen vanillaGui = VanillaGuiScreen.wrap(gui);
             GuiButton replayButton = new GuiReplayButton().onClick(() -> {
-                ServerInfo serverInfo = ((AddServerScreenAccessor) gui).getServer();
+                ServerData serverInfo = ((AddServerScreenAccessor) gui).getServer();
                 ServerInfoExt serverInfoExt = ServerInfoExt.from(serverInfo);
                 Boolean state = serverInfoExt.getAutoRecording();
                 GuiToggleButton<String> autoRecording = new GuiToggleButton<String>()
                         .setI18nLabel("replaymod.gui.settings.autostartrecording")
                         .setValues(
-                                I18n.translate("replaymod.gui.settings.default"),
-                                I18n.translate("options.off"),
-                                I18n.translate("options.on")
+                                I18n.format("replaymod.gui.settings.default"),
+                                I18n.format("options.off"),
+                                I18n.format("options.on")
                         )
                         .setSelected(state == null ? 0 : state ? 2 : 1);
                 autoRecording.onClick(() -> {

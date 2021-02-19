@@ -9,26 +9,26 @@
     //$$ "Mixin_MoveRealmsButton",
     //#endif
     //#if MC>=11400
-    "MixinCamera",
-    "MixinInGameHud",
+    //$$ "MixinCamera",
+    //$$ "MixinInGameHud",
     //#endif
     "EntityLivingBaseAccessor",
     //#if MC>=11400
-    "Mixin_ShowSpectatedHand_NoOF",
-    "Mixin_ShowSpectatedHand_OF",
+    //$$ "Mixin_ShowSpectatedHand_NoOF",
+    //$$ "Mixin_ShowSpectatedHand_OF",
     //#else
-    //$$ "EntityOtherPlayerMPAccessor",
+    "EntityOtherPlayerMPAccessor",
     //#endif
     "EntityPlayerAccessor",
     "FirstPersonRendererAccessor",
     //#if MC>=10904
-    "MixinParticleManager",
+    //$$ "MixinParticleManager",
     //#endif
     //#if MC>=10800
     "MixinGuiSpectator",
     "MixinRenderArrow",
     //#if MC<11400
-    //$$ "MixinRenderManager",
+    "MixinRenderManager",
     //#endif
     "MixinViewFrustum",
     //#else

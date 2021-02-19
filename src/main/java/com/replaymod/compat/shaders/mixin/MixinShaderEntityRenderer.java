@@ -4,22 +4,22 @@ package com.replaymod.compat.shaders.mixin;
 import com.replaymod.compat.shaders.ShaderReflection;
 import com.replaymod.replay.ReplayHandler;
 import com.replaymod.replay.ReplayModReplay;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.renderer.EntityRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(GameRenderer.class)
+@Mixin(EntityRenderer.class)
 public abstract class MixinShaderEntityRenderer {
 
     //#if MC>=11400
-    @Inject(method = "renderWorld", at = @At("HEAD"))
+    //$$ @Inject(method = "updateCameraAndRender(FJ)V", at = @At("HEAD"))
     //#else
     //#if MC>=11400
     //$$ @Inject(method = "updateCameraAndRender(FJ)V", at = @At("HEAD"))
     //#else
-    //$$ @Inject(method = "renderWorldPass", at = @At("HEAD"))
+    @Inject(method = "renderWorldPass", at = @At("HEAD"))
     //#endif
     //#endif
     private void replayModCompat_updateShaderFrameTimeCounter(CallbackInfo ignore) {

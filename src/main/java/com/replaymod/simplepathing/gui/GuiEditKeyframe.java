@@ -34,7 +34,7 @@ import de.johni0702.minecraft.gui.popup.AbstractGuiPopup;
 import de.johni0702.minecraft.gui.utils.Colors;
 import de.johni0702.minecraft.gui.utils.Consumer;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadablePoint;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.I18n;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,9 +42,9 @@ import java.util.Map;
 import java.util.Optional;
 
 //#if MC>=11400
-import com.replaymod.core.versions.MCVer.Keyboard;
+//$$ import com.replaymod.core.versions.MCVer.Keyboard;
 //#else
-//$$ import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Keyboard;
 //#endif
 
 import static de.johni0702.minecraft.gui.utils.Utils.link;
@@ -290,7 +290,7 @@ public abstract class GuiEditKeyframe<T extends GuiEditKeyframe<T>> extends Abst
                 setLayout(new VerticalLayout());
 
                 dropdown = new GuiDropdownMenu<InterpolatorType>()
-                        .setToString(s -> I18n.translate(s.getI18nName()))
+                        .setToString(s -> I18n.format(s.getI18nName()))
                         .setValues(InterpolatorType.values()).setHeight(20)
                         .onSelection(i -> setSettingsPanel(dropdown.getSelectedValue()));
 

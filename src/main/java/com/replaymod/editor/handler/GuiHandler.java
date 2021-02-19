@@ -8,16 +8,16 @@ import com.replaymod.replay.gui.screen.GuiReplayViewer;
 import de.johni0702.minecraft.gui.container.AbstractGuiScreen;
 import de.johni0702.minecraft.gui.container.GuiScreen;
 import de.johni0702.minecraft.gui.element.GuiButton;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.crash.CrashReport;
 
 //#if FABRIC>=1
-import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-import java.util.List;
+//$$ import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
+//$$ import net.minecraft.client.gui.screen.Screen;
+//$$ import net.minecraft.client.gui.widget.AbstractButtonWidget;
+//$$ import java.util.List;
 //#else
-//$$ import net.minecraftforge.client.event.GuiScreenEvent;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 //#endif
 
 import java.io.IOException;
@@ -26,12 +26,12 @@ import static com.replaymod.core.versions.MCVer.*;
 
 public class GuiHandler extends EventRegistrations {
     //#if FABRIC>=1
-    { on(InitScreenCallback.EVENT, this::injectIntoReplayViewer); }
-    public void injectIntoReplayViewer(Screen vanillaGuiScreen, List<AbstractButtonWidget> buttonList) {
+    //$$ { on(InitScreenCallback.EVENT, this::injectIntoReplayViewer); }
+    //$$ public void injectIntoReplayViewer(Screen vanillaGuiScreen, List<AbstractButtonWidget> buttonList) {
     //#else
-    //$$ @SubscribeEvent
-    //$$ public void injectIntoReplayViewer(GuiScreenEvent.InitGuiEvent.Post event) {
-    //$$     net.minecraft.client.gui.screen.Screen vanillaGuiScreen = getGui(event);
+    @SubscribeEvent
+    public void injectIntoReplayViewer(GuiScreenEvent.InitGuiEvent.Post event) {
+        net.minecraft.client.gui.GuiScreen vanillaGuiScreen = getGui(event);
     //#endif
         AbstractGuiScreen guiScreen = GuiScreen.from(vanillaGuiScreen);
         if (!(guiScreen instanceof GuiReplayViewer)) {
@@ -51,7 +51,7 @@ public class GuiHandler extends EventRegistrations {
                     }
                 }.open();
             } catch (IOException e) {
-                Utils.error(ReplayModEditor.LOGGER, replayViewer, CrashReport.create(e, "Opening replay editor"), () -> {});
+                Utils.error(ReplayModEditor.LOGGER, replayViewer, CrashReport.makeCrashReport(e, "Opening replay editor"), () -> {});
             }
         }).setSize(73, 20).setI18nLabel("replaymod.gui.edit").setDisabled());
     }

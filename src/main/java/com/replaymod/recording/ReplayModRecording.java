@@ -11,27 +11,27 @@ import com.replaymod.recording.mixin.NetworkManagerAccessor;
 import com.replaymod.recording.packet.PacketListener;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
-import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 //#if FABRIC>=1
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+//$$ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 //#else
-//$$ import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 //#endif
 
 //#if MC>=11400
 //#else
-//$$ import io.netty.channel.ChannelDuplexHandler;
-//$$ import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
 //#endif
 
 public class ReplayModRecording implements Module {
 
     private static final Logger LOGGER = LogManager.getLogger();
     //#if MC>=11400
-    private static final AttributeKey<Void> ATTR_CHECKED = AttributeKey.newInstance("ReplayModRecording_checked");
+    //$$ private static final AttributeKey<Void> ATTR_CHECKED = AttributeKey.newInstance("ReplayModRecording_checked");
     //#endif
 
     { instance = this; }
@@ -68,27 +68,27 @@ public class ReplayModRecording implements Module {
         new GuiHandler(core).register();
 
         //#if FABRIC>=1
-        ClientSidePacketRegistry.INSTANCE.register(Restrictions.PLUGIN_CHANNEL, (packetContext, packetByteBuf) -> {});
+        //$$ ClientSidePacketRegistry.INSTANCE.register(Restrictions.PLUGIN_CHANNEL, (packetContext, packetByteBuf) -> {});
         //#else
         //#if MC>=11400
         //$$ NetworkRegistry.newEventChannel(Restrictions.PLUGIN_CHANNEL, () -> "0", any -> true, any -> true);
         //#else
-        //$$ NetworkRegistry.INSTANCE.newChannel(Restrictions.PLUGIN_CHANNEL, new RestrictionsChannelHandler());
+        NetworkRegistry.INSTANCE.newChannel(Restrictions.PLUGIN_CHANNEL, new RestrictionsChannelHandler());
         //#endif
         //#endif
     }
 
     //#if MC<11400
-    //$$ @ChannelHandler.Sharable
-    //$$ private static class RestrictionsChannelHandler extends ChannelDuplexHandler {}
+    @ChannelHandler.Sharable
+    private static class RestrictionsChannelHandler extends ChannelDuplexHandler {}
     //#endif
 
-    public void initiateRecording(ClientConnection networkManager) {
+    public void initiateRecording(NetworkManager networkManager) {
         Channel channel = ((NetworkManagerAccessor) networkManager).getChannel();
         if (channel.pipeline().get("ReplayModReplay_replaySender") != null) return;
         //#if MC>=11400
-        if (channel.hasAttr(ATTR_CHECKED)) return;
-        channel.attr(ATTR_CHECKED).set(null);
+        //$$ if (channel.hasAttr(ATTR_CHECKED)) return;
+        //$$ channel.attr(ATTR_CHECKED).set(null);
         //#endif
         connectionEventHandler.onConnectedToServerEvent(networkManager);
     }

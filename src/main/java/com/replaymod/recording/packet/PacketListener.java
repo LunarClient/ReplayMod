@@ -26,41 +26,41 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
-import net.minecraft.network.packet.s2c.play.ItemPickupAnimationS2CPacket;
-import net.minecraft.network.packet.s2c.play.MobSpawnS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.S40PacketDisconnect;
+import net.minecraft.network.play.server.S0DPacketCollectItem;
+import net.minecraft.network.play.server.S0FPacketSpawnMob;
+import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.network.NetworkState;
+import net.minecraft.entity.DataWatcher;
+import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.Packet;
-import net.minecraft.util.PacketByteBuf;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.crash.CrashReport;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 //#if MC>=11400
-import net.minecraft.network.packet.s2c.login.LoginSuccessS2CPacket;
+//$$ import net.minecraft.network.login.server.SLoginSuccessPacket;
 //#else
-//$$ import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
+import net.minecraftforge.fml.common.network.internal.FMLProxyPacket;
 //#endif
 
 //#if MC>=10904
 //#else
-//$$ import java.util.List;
+import java.util.List;
 //#endif
 
 //#if MC>=10800
 //#if MC<10904
-//$$ import net.minecraft.network.play.server.S46PacketSetCompressionLevel;
+import net.minecraft.network.play.server.S46PacketSetCompressionLevel;
 //#endif
-import net.minecraft.network.packet.s2c.login.LoginCompressionS2CPacket;
-import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
-import net.minecraft.network.NetworkSide;
+import net.minecraft.network.login.server.S03PacketEnableCompression;
+import net.minecraft.network.play.server.S48PacketResourcePackSend;
+import net.minecraft.network.EnumPacketDirection;
 //#endif
 
 import java.io.DataOutputStream;
@@ -84,7 +84,7 @@ import static com.replaymod.replaystudio.util.Utils.writeInt;
 
 public class PacketListener extends ChannelInboundHandlerAdapter {
 
-    private static final MinecraftClient mc = getMinecraft();
+    private static final Minecraft mc = getMinecraft();
     private static final Logger logger = LogManager.getLogger();
 
     private final ReplayMod core;
@@ -105,11 +105,11 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
     private long timePassedWhilePaused;
     private volatile boolean serverWasPaused;
     //#if MC>=11400
-    private NetworkState connectionState = NetworkState.LOGIN;
-    private boolean loginPhase = true;
+    //$$ private ProtocolType connectionState = ProtocolType.LOGIN;
+    //$$ private boolean loginPhase = true;
     //#else
-    //$$ private EnumConnectionState connectionState = EnumConnectionState.PLAY;
-    //$$ private boolean loginPhase = false;
+    private EnumConnectionState connectionState = EnumConnectionState.PLAY;
+    private boolean loginPhase = false;
     //#endif
 
     /**
@@ -168,9 +168,9 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
             return;
         }
         try {
-            if(packet instanceof PlayerSpawnS2CPacket) {
+            if(packet instanceof S0CPacketSpawnPlayer) {
                 //#if MC>=10800
-                UUID uuid = ((PlayerSpawnS2CPacket) packet).getPlayerUuid();
+                UUID uuid = ((S0CPacketSpawnPlayer) packet).getPlayer();
                 //#else
                 //$$ UUID uuid = ((S0CPacketSpawnPlayer) packet).func_148948_e().getId();
                 //#endif
@@ -181,13 +181,13 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
             }
 
             //#if MC>=10800
-            if (packet instanceof LoginCompressionS2CPacket) {
+            if (packet instanceof S03PacketEnableCompression) {
                 return; // Replay data is never compressed on the packet level
             }
             //#if MC<10904
-            //$$ if (packet instanceof S46PacketSetCompressionLevel) {
-            //$$     return; // Replay data is never compressed on the packet level
-            //$$ }
+            if (packet instanceof S46PacketSetCompressionLevel) {
+                return; // Replay data is never compressed on the packet level
+            }
             //#endif
             //#endif
 
@@ -227,10 +227,10 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
             });
 
             //#if MC>=11400
-            if (packet instanceof LoginSuccessS2CPacket) {
-                connectionState = NetworkState.PLAY;
-                loginPhase = false;
-            }
+            //$$ if (packet instanceof SLoginSuccessPacket) {
+            //$$     connectionState = ProtocolType.PLAY;
+            //$$     loginPhase = false;
+            //$$ }
             //#endif
         } catch(Exception e) {
             logger.error("Writing packet:", e);
@@ -299,7 +299,7 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
                     }
                 } catch (Exception e) {
                     logger.error("Saving replay file:", e);
-                    CrashReport crashReport = CrashReport.create(e, "Saving replay file");
+                    CrashReport crashReport = CrashReport.makeCrashReport(e, "Saving replay file");
                     core.runLater(() -> Utils.error(logger, VanillaGuiScreen.wrap(mc.currentScreen), crashReport, guiSavingReplay::close));
                     return;
                 }
@@ -325,12 +325,12 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
                 Packet packet = (Packet) msg;
 
                 //#if MC>=10904
-                if(packet instanceof ItemPickupAnimationS2CPacket) {
-                    if(mc.player != null ||
-                            ((ItemPickupAnimationS2CPacket) packet).getEntityId() == mc.player.getEntityId()) {
+                //$$ if(packet instanceof SPacketCollectItem) {
+                //$$     if(mc.thePlayer != null ||
+                //$$             ((SPacketCollectItem) packet).getCollectedItemEntityID() == mc.thePlayer.getEntityId()) {
                 //#else
-                //$$ if(packet instanceof S0DPacketCollectItem) {
-                //$$     if(mc.thePlayer != null || ((S0DPacketCollectItem) packet).getEntityID() == mc.thePlayer.getEntityId()) {
+                if(packet instanceof S0DPacketCollectItem) {
+                    if(mc.thePlayer != null || ((S0DPacketCollectItem) packet).getEntityID() == mc.thePlayer.getEntityId()) {
                 //#endif
                         super.channelRead(ctx, msg);
                         return;
@@ -338,8 +338,8 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
                 }
 
                 //#if MC>=10800
-                if (packet instanceof ResourcePackSendS2CPacket) {
-                    save(resourcePackRecorder.handleResourcePack((ResourcePackSendS2CPacket) packet));
+                if (packet instanceof S48PacketResourcePackSend) {
+                    save(resourcePackRecorder.handleResourcePack((S48PacketResourcePackSend) packet));
                     return;
                 }
                 //#else
@@ -353,39 +353,39 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
                 //#endif
 
                 //#if MC<11400
-                //$$ if (packet instanceof FMLProxyPacket) {
-                //$$     // This packet requires special handling
+                if (packet instanceof FMLProxyPacket) {
+                    // This packet requires special handling
                     //#if MC>=10800
-                    //$$ ((FMLProxyPacket) packet).toS3FPackets().forEach(this::save);
+                    ((FMLProxyPacket) packet).toS3FPackets().forEach(this::save);
                     //#else
                     //$$ save(((FMLProxyPacket) packet).toS3FPacket());
                     //#endif
-                //$$     super.channelRead(ctx, msg);
-                //$$     return;
-                //$$ }
+                    super.channelRead(ctx, msg);
+                    return;
+                }
                 //#endif
 
                 //#if MC>=10800
-                if (packet instanceof CustomPayloadS2CPacket) {
+                if (packet instanceof S3FPacketCustomPayload) {
                     // Forge may read from this ByteBuf and/or release it during handling
                     // We want to save the full thing however, so we create a copy and save that one instead of the
                     // original one
                     // Note: This isn't an issue with vanilla MC because our saving code runs on the main thread
                     //       shortly before the vanilla handling code does. Forge however does some stuff on the netty
                     //       threads which leads to this race condition
-                    packet = new CustomPayloadS2CPacket(
-                            ((CustomPayloadS2CPacket) packet).getChannel(),
-                            new PacketByteBuf(((CustomPayloadS2CPacket) packet).getData().slice().retain())
+                    packet = new S3FPacketCustomPayload(
+                            ((S3FPacketCustomPayload) packet).getChannelName(),
+                            new PacketBuffer(((S3FPacketCustomPayload) packet).getBufferData().slice().retain())
                     );
                 }
                 //#endif
 
                 save(packet);
 
-                if (packet instanceof CustomPayloadS2CPacket) {
-                    CustomPayloadS2CPacket p = (CustomPayloadS2CPacket) packet;
-                    if (Restrictions.PLUGIN_CHANNEL.equals(p.getChannel())) {
-                        packet = new DisconnectS2CPacket(new LiteralText("Please update to view this replay."));
+                if (packet instanceof S3FPacketCustomPayload) {
+                    S3FPacketCustomPayload p = (S3FPacketCustomPayload) packet;
+                    if (Restrictions.PLUGIN_CHANNEL.equals(p.getChannelName())) {
+                        packet = new S40PacketDisconnect(new ChatComponentText("Please update to view this replay."));
                         save(packet);
                     }
                 }
@@ -399,61 +399,61 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
     }
 
     //#if MC>=10904
-    private <T> void DataManager_set(DataTracker dataManager, DataTracker.Entry<T> entry) {
-        dataManager.startTracking(entry.getData(), entry.get());
-    }
+    //$$ private <T> void DataManager_set(EntityDataManager dataManager, EntityDataManager.DataEntry<T> entry) {
+    //$$     dataManager.register(entry.getKey(), entry.getValue());
+    //$$ }
     //#endif
 
     @SuppressWarnings("unchecked")
     private PacketData getPacketData(int timestamp, Packet packet) throws Exception {
         //#if MC<11500
-        //$$ if (packet instanceof MobSpawnS2CPacket) {
-        //$$     MobSpawnS2CPacket p = (MobSpawnS2CPacket) packet;
-        //$$     SPacketSpawnMobAccessor pa = (SPacketSpawnMobAccessor) p;
-        //$$     if (pa.getDataManager() == null) {
-        //$$         pa.setDataManager(new DataTracker(null));
-        //$$         if (p.getTrackedValues() != null) {
-        //$$             Set<Integer> seen = new HashSet<>();
+        if (packet instanceof S0FPacketSpawnMob) {
+            S0FPacketSpawnMob p = (S0FPacketSpawnMob) packet;
+            SPacketSpawnMobAccessor pa = (SPacketSpawnMobAccessor) p;
+            if (pa.getDataManager() == null) {
+                pa.setDataManager(new DataWatcher(null));
+                if (p.func_149027_c() != null) {
+                    Set<Integer> seen = new HashSet<>();
                     //#if MC>=10904
-                    //$$ for (DataTracker.Entry<?> entry : Lists.reverse(p.getTrackedValues())) {
-                    //$$     if (!seen.add(entry.getData().getId())) continue;
+                    //$$ for (EntityDataManager.DataEntry<?> entry : Lists.reverse(p.getDataManagerEntries())) {
+                    //$$     if (!seen.add(entry.getKey().getId())) continue;
                     //$$     DataManager_set(pa.getDataManager(), entry);
                     //$$ }
                     //#else
-                    //$$ for(DataWatcher.WatchableObject wo : Lists.reverse((List<DataWatcher.WatchableObject>) p.func_149027_c())) {
-                    //$$     if (!seen.add(wo.getDataValueId())) continue;
-                    //$$     pa.getDataManager().addObject(wo.getDataValueId(), wo.getObject());
-                    //$$ }
+                    for(DataWatcher.WatchableObject wo : Lists.reverse((List<DataWatcher.WatchableObject>) p.func_149027_c())) {
+                        if (!seen.add(wo.getDataValueId())) continue;
+                        pa.getDataManager().addObject(wo.getDataValueId(), wo.getObject());
+                    }
                     //#endif
-        //$$         }
-        //$$     }
-        //$$ }
-        //$$
-        //$$ if (packet instanceof PlayerSpawnS2CPacket) {
-        //$$     PlayerSpawnS2CPacket p = (PlayerSpawnS2CPacket) packet;
-        //$$     SPacketSpawnPlayerAccessor pa = (SPacketSpawnPlayerAccessor) p;
-        //$$     if (pa.getDataManager() == null) {
-        //$$         pa.setDataManager(new DataTracker(null));
-        //$$         if (p.getTrackedValues() != null) {
-        //$$             Set<Integer> seen = new HashSet<>();
+                }
+            }
+        }
+
+        if (packet instanceof S0CPacketSpawnPlayer) {
+            S0CPacketSpawnPlayer p = (S0CPacketSpawnPlayer) packet;
+            SPacketSpawnPlayerAccessor pa = (SPacketSpawnPlayerAccessor) p;
+            if (pa.getDataManager() == null) {
+                pa.setDataManager(new DataWatcher(null));
+                if (p.func_148944_c() != null) {
+                    Set<Integer> seen = new HashSet<>();
                     //#if MC>=10904
-                    //$$ for (DataTracker.Entry<?> entry : Lists.reverse(p.getTrackedValues())) {
-                    //$$     if (!seen.add(entry.getData().getId())) continue;
+                    //$$ for (EntityDataManager.DataEntry<?> entry : Lists.reverse(p.getDataManagerEntries())) {
+                    //$$     if (!seen.add(entry.getKey().getId())) continue;
                     //$$     DataManager_set(pa.getDataManager(), entry);
                     //$$ }
                     //#else
-                    //$$ for(DataWatcher.WatchableObject wo : Lists.reverse((List<DataWatcher.WatchableObject>) p.func_148944_c())) {
-                    //$$     if (!seen.add(wo.getDataValueId())) continue;
-                    //$$     pa.getDataManager().addObject(wo.getDataValueId(), wo.getObject());
-                    //$$ }
+                    for(DataWatcher.WatchableObject wo : Lists.reverse((List<DataWatcher.WatchableObject>) p.func_148944_c())) {
+                        if (!seen.add(wo.getDataValueId())) continue;
+                        pa.getDataManager().addObject(wo.getDataValueId(), wo.getObject());
+                    }
                     //#endif
-        //$$         }
-        //$$     }
-        //$$ }
+                }
+            }
+        }
         //#endif
 
         //#if MC>=10800
-        Integer packetId = connectionState.getPacketId(NetworkSide.CLIENTBOUND, packet);
+        Integer packetId = connectionState.getPacketId(EnumPacketDirection.CLIENTBOUND, packet);
         //#else
         //$$ Integer packetId = (Integer) connectionState.func_150755_b().inverse().get(packet.getClass());
         //#endif
@@ -462,7 +462,7 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
         }
         ByteBuf byteBuf = Unpooled.buffer();
         try {
-            packet.write(new PacketByteBuf(byteBuf));
+            packet.writePacketData(new PacketBuffer(byteBuf));
             return new PacketData(timestamp, new com.replaymod.replaystudio.protocol.Packet(
                     MCVer.getPacketTypeRegistry(loginPhase),
                     packetId,
@@ -476,8 +476,8 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
             byteBuf.release();
 
             //#if MC>=10800
-            if (packet instanceof CustomPayloadS2CPacket) {
-                ((CustomPayloadS2CPacket) packet).getData().release();
+            if (packet instanceof S3FPacketCustomPayload) {
+                ((S3FPacketCustomPayload) packet).getBufferData().release();
             }
             //#endif
         }
@@ -497,8 +497,8 @@ public class PacketListener extends ChannelInboundHandlerAdapter {
             marker.setX(Entity_getX(view));
             marker.setY(Entity_getY(view));
             marker.setZ(Entity_getZ(view));
-            marker.setYaw(view.yaw);
-            marker.setPitch(view.pitch);
+            marker.setYaw(view.rotationYaw);
+            marker.setPitch(view.rotationPitch);
         }
         // Roll is always 0
         saveService.submit(() -> {

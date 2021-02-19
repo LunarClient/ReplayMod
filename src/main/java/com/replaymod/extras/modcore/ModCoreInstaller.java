@@ -52,13 +52,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 //#if FABRIC>=1
-import net.fabricmc.loader.api.FabricLoader;
+//$$ import net.fabricmc.loader.api.FabricLoader;
 //#else
 //#if MC>=11400
 //#else
-//$$ import net.minecraft.launchwrapper.Launch;
-//$$ import java.net.URLClassLoader;
-//$$ import java.util.LinkedHashSet;
+import net.minecraft.launchwrapper.Launch;
+import java.net.URLClassLoader;
+import java.util.LinkedHashSet;
 //#endif
 //#endif
 
@@ -74,9 +74,9 @@ public class ModCoreInstaller {
     private static boolean isInitalized() {
         try {
             //#if MC<11400
-            //$$ LinkedHashSet<String> objects = new LinkedHashSet<>();
-            //$$ objects.add(className);
-            //$$ Launch.classLoader.clearNegativeEntries(objects);
+            LinkedHashSet<String> objects = new LinkedHashSet<>();
+            objects.add(className);
+            Launch.classLoader.clearNegativeEntries(objects);
             //#endif
             return Class.forName(className) != null;
         } catch (ClassNotFoundException ignored) {
@@ -170,10 +170,10 @@ public class ModCoreInstaller {
             URL url = file.toURI().toURL();
             ClassLoader classLoader = ModCoreInstaller.class.getClassLoader();
             //#if MC>=11400
-            Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
+            //$$ Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
             //#else
-            //$$ Launch.classLoader.addURL(url);
-            //$$ Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            Launch.classLoader.addURL(url);
+            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             //#endif
             method.setAccessible(true);
             method.invoke(classLoader, url);

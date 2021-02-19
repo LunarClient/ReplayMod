@@ -11,11 +11,11 @@ import com.replaymod.render.hooks.Texture2DStateCallback;
 import com.replaymod.render.rendering.FrameCapturer;
 import com.replaymod.render.shader.Program;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadableDimension;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.Identifier;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.util.ReportedException;
+import net.minecraft.util.ResourceLocation;
 
-import static com.mojang.blaze3d.platform.GlStateManager.*;
+import static net.minecraft.client.renderer.GlStateManager.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,8 +25,8 @@ import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 public class ODSFrameCapturer implements FrameCapturer<ODSOpenGlFrame> {
-    private static final Identifier vertexResource = new Identifier("replaymod", "shader/ods.vert");
-    private static final Identifier fragmentResource = new Identifier("replaymod", "shader/ods.frag");
+    private static final ResourceLocation vertexResource = new ResourceLocation("replaymod", "shader/ods.vert");
+    private static final ResourceLocation fragmentResource = new ResourceLocation("replaymod", "shader/ods.frag");
 
     private final CubicPboOpenGlFrameCapturer left, right;
     private final Program shaderProgram;
@@ -76,7 +76,7 @@ public class ODSFrameCapturer implements FrameCapturer<ODSOpenGlFrame> {
             leftEyeVariable = shaderProgram.getUniformVariable("leftEye");
             directionVariable = shaderProgram.getUniformVariable("direction");
         } catch (Exception e) {
-            throw new CrashException(CrashReport.create(e, "Creating ODS shaders"));
+            throw new ReportedException(CrashReport.makeCrashReport(e, "Creating ODS shaders"));
         }
     }
 
@@ -84,21 +84,21 @@ public class ODSFrameCapturer implements FrameCapturer<ODSOpenGlFrame> {
         shaderProgram.use();
         setTexture("texture", 0);
         //#if MC>=11500
-        setTexture("overlay", 1);
-        setTexture("lightMap", 2);
+        //$$ setTexture("overlay", 1);
+        //$$ setTexture("lightMap", 2);
         //#else
-        //$$ setTexture("lightMap", 1);
+        setTexture("lightMap", 1);
         //#endif
 
         renderStateEvents = new EventRegistrations();
         Program.Uniform[] texture2DUniforms = new Program.Uniform[]{
                 shaderProgram.getUniformVariable("textureEnabled"),
                 //#if MC>=11500
-                shaderProgram.getUniformVariable("overlayEnabled"),
-                shaderProgram.getUniformVariable("lightMapEnabled"),
-                //#else
-                //$$ shaderProgram.getUniformVariable("lightMapEnabled"),
                 //$$ shaderProgram.getUniformVariable("overlayEnabled"),
+                //$$ shaderProgram.getUniformVariable("lightMapEnabled"),
+                //#else
+                shaderProgram.getUniformVariable("lightMapEnabled"),
+                shaderProgram.getUniformVariable("overlayEnabled"),
                 //#endif
         };
         renderStateEvents.on(Texture2DStateCallback.EVENT, (id, enabled) -> {
@@ -167,19 +167,19 @@ public class ODSFrameCapturer implements FrameCapturer<ODSOpenGlFrame> {
             resize(getFrameWidth(), getFrameHeight());
 
             pushMatrix();
-            frameBuffer().beginWrite(true);
+            frameBuffer().bindFramebuffer(true);
 
             clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT
                     //#if MC>=11400
-                    , false
+                    //$$ , false
                     //#endif
             );
-            enableTexture();
+            enableTexture2D();
 
             directionVariable.set(captureData.ordinal());
             worldRenderer.renderWorld(partialTicks, null);
 
-            frameBuffer().endWrite();
+            frameBuffer().unbindFramebuffer();
             popMatrix();
 
             return captureFrame(frameId, captureData);

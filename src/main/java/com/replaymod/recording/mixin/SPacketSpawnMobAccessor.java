@@ -1,16 +1,16 @@
 package com.replaymod.recording.mixin;
 
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.network.packet.s2c.play.MobSpawnS2CPacket;
+import net.minecraft.entity.DataWatcher;
+import net.minecraft.network.play.server.S0FPacketSpawnMob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MobSpawnS2CPacket.class)
+@Mixin(S0FPacketSpawnMob.class)
 public interface SPacketSpawnMobAccessor {
     //#if MC<11500
-    //$$ @Accessor("dataTracker")
-    //$$ DataTracker getDataManager();
-    //$$ @Accessor("dataTracker")
-    //$$ void setDataManager(DataTracker value);
+    @Accessor("field_149043_l")
+    DataWatcher getDataManager();
+    @Accessor("field_149043_l")
+    void setDataManager(DataWatcher value);
     //#endif
 }

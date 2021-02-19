@@ -5,22 +5,22 @@ import com.replaymod.core.mixin.MinecraftAccessor;
 import com.replaymod.replaystudio.protocol.PacketTypeRegistry;
 import com.replaymod.replaystudio.us.myles.ViaVersion.api.protocol.ProtocolVersion;
 import com.replaymod.replaystudio.us.myles.ViaVersion.packets.State;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,83 +29,83 @@ import org.apache.logging.log4j.Logger;
 //#endif
 
 //#if MC>=11500
-import net.minecraft.client.model.ModelPart.Cuboid;
-import java.util.ArrayList;
+//$$ import net.minecraft.client.model.ModelPart.Cuboid;
+//$$ import java.util.ArrayList;
 //#else
-//$$ import net.minecraft.client.model.Box;
+import net.minecraft.client.model.ModelBox;
 //#endif
 
 //#if MC>=11400
-import com.replaymod.core.mixin.AbstractButtonWidgetAccessor;
-import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
-
-import java.util.concurrent.CompletableFuture;
-
+//$$ import com.replaymod.core.mixin.AbstractButtonWidgetAccessor;
+//$$ import net.minecraft.util.SharedConstants;
+//$$ import net.minecraft.client.gui.widget.button.Button;
+//$$ import net.minecraft.client.gui.widget.Widget;
+//$$
+//$$ import java.util.concurrent.CompletableFuture;
+//$$
 //#if MC>=11600
 //$$ import net.minecraft.text.TranslatableText;
 //#else
-import net.minecraft.client.resource.language.I18n;
+//$$ import net.minecraft.client.resources.I18n;
 //#endif
 //#else
-//$$ import com.google.common.util.concurrent.FutureCallback;
-//$$ import com.google.common.util.concurrent.Futures;
-//$$ import com.google.common.util.concurrent.ListenableFuture;
-//$$ import net.minecraft.client.gui.GuiButton;
-//$$ import net.minecraft.realms.RealmsSharedConstants;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.realms.RealmsSharedConstants;
 //#endif
 
 //#if FABRIC>=1
 //#else
-//$$ import net.minecraft.entity.LivingEntity;
-//$$ import net.minecraftforge.client.event.GuiScreenEvent;
-//$$ import net.minecraftforge.client.event.RenderGameOverlayEvent;
-//$$ import net.minecraftforge.client.event.RenderLivingEvent;
-//$$ import net.minecraftforge.common.MinecraftForge;
-//$$ import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.EventBus;
 //#endif
 
 //#if MC>=11400
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
+//$$ import net.minecraft.client.MainWindow;
+//$$ import net.minecraft.client.util.InputMappings;
+//$$ import org.lwjgl.glfw.GLFW;
 //#else
-//$$ import net.minecraft.client.gui.ScaledResolution;
-//$$ import net.minecraft.client.resources.ResourcePackRepository;
-//$$ import net.minecraftforge.fml.client.FMLClientHandler;
-//$$ import org.apache.logging.log4j.LogManager;
-//$$ import org.lwjgl.Sys;
-//$$ import java.awt.Desktop;
-//$$ import java.io.IOException;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.resources.ResourcePackRepository;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import org.apache.logging.log4j.LogManager;
+import org.lwjgl.Sys;
+import java.awt.Desktop;
+import java.io.IOException;
 //#endif
 
 //#if MC>=11400
-import net.minecraft.client.sound.PositionedSoundInstance;
+//$$ import net.minecraft.client.audio.SimpleSound;
 //#else
-//$$ import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.PositionedSoundRecord;
 //#endif
 
 //#if MC>=10904
-import com.replaymod.render.blend.mixin.ParticleAccessor;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.Vec3d;
+//$$ import com.replaymod.render.blend.mixin.ParticleAccessor;
+//$$ import net.minecraft.client.particle.Particle;
+//$$ import net.minecraft.util.SoundEvent;
+//$$ import net.minecraft.util.math.Vec3d;
 //#endif
 
 //#if MC>=10809
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 //#else
 //$$ import net.minecraftforge.fml.common.FMLCommonHandler;
 //#endif
 
 //#if MC>=10800
-import net.minecraft.client.render.BufferBuilder;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormatElement;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.client.renderer.vertex.VertexFormatElement;
 //#if MC<11500
-//$$ import net.minecraft.client.render.chunk.ChunkRenderTask;
+import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator;
 //#endif
 //#else
 //$$ import com.replaymod.core.mixin.ResourcePackRepositoryAccessor;
@@ -117,12 +117,12 @@ import net.minecraft.client.render.VertexFormatElement;
 //#endif
 
 //#if FABRIC>=1
-import net.fabricmc.loader.api.FabricLoader;
+//$$ import net.fabricmc.loader.api.FabricLoader;
 //#else
 //#if MC>=11400
 //$$ import net.minecraftforge.fml.ModList;
 //#else
-//$$ import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Loader;
 //#endif
 //#endif
 
@@ -141,9 +141,9 @@ public class MCVer {
     private static Logger LOGGER = LogManager.getLogger();
 
     //#if FABRIC<=0
-    //$$ public static IEventBus FORGE_BUS = MinecraftForge.EVENT_BUS;
+    public static EventBus FORGE_BUS = MinecraftForge.EVENT_BUS;
     //#if MC>=10809
-    //$$ public static IEventBus FML_BUS = FORGE_BUS;
+    public static EventBus FML_BUS = FORGE_BUS;
     //#else
     //$$ public static EventBus FML_BUS = FMLCommonHandler.instance().bus();
     //#endif
@@ -151,21 +151,21 @@ public class MCVer {
 
     public static boolean isModLoaded(String id) {
         //#if FABRIC>=1
-        return FabricLoader.getInstance().isModLoaded(id.toLowerCase());
+        //$$ return FabricLoader.getInstance().isModLoaded(id.toLowerCase());
         //#else
         //#if MC>=11400
         //$$ return ModList.get().isLoaded(id.toLowerCase());
         //#else
-        //$$ return Loader.isModLoaded(id);
+        return Loader.isModLoaded(id);
         //#endif
         //#endif
     }
 
     public static int getProtocolVersion() {
         //#if MC>=11400
-        return SharedConstants.getGameVersion().getProtocolVersion();
+        //$$ return SharedConstants.getVersion().getProtocolVersion();
         //#else
-        //$$ return RealmsSharedConstants.NETWORK_PROTOCOL_VERSION;
+        return RealmsSharedConstants.NETWORK_PROTOCOL_VERSION;
         //#endif
     }
 
@@ -176,76 +176,76 @@ public class MCVer {
         );
     }
 
-    public static void addDetail(CrashReportSection category, String name, Callable<String> callable) {
+    public static void addDetail(CrashReportCategory category, String name, Callable<String> callable) {
         //#if MC>=10904
         //#if MC>=11200
-        category.add(name, callable::call);
+        //$$ category.addDetail(name, callable::call);
         //#else
         //$$ category.setDetail(name, callable::call);
         //#endif
         //#else
-        //$$ category.addCrashSectionCallable(name, callable);
+        category.addCrashSectionCallable(name, callable);
         //#endif
     }
 
     public static double Entity_getX(Entity entity) {
         //#if MC>=11500
-        return entity.getX();
+        //$$ return entity.getX();
         //#else
-        //$$ return entity.x;
+        return entity.posX;
         //#endif
     }
 
     public static double Entity_getY(Entity entity) {
         //#if MC>=11500
-        return entity.getY();
+        //$$ return entity.getY();
         //#else
-        //$$ return entity.y;
+        return entity.posY;
         //#endif
     }
 
     public static double Entity_getZ(Entity entity) {
         //#if MC>=11500
-        return entity.getZ();
+        //$$ return entity.getZ();
         //#else
-        //$$ return entity.z;
+        return entity.posZ;
         //#endif
     }
 
     public static void Entity_setPos(Entity entity, double x, double y, double z) {
         //#if MC>=11500
-        entity.setPos(x, y, z);
+        //$$ entity.setPos(x, y, z);
         //#else
-        //$$ entity.x = x;
-        //$$ entity.y = y;
-        //$$ entity.z = z;
+        entity.posX = x;
+        entity.posY = y;
+        entity.posZ = z;
         //#endif
     }
 
     //#if MC>=11400
-    public static void width(AbstractButtonWidget button, int value) {
-        button.setWidth(value);
-    }
-
-    public static int width(AbstractButtonWidget button) {
-        return button.getWidth();
-    }
-
-    public static int height(AbstractButtonWidget button) {
-        return ((AbstractButtonWidgetAccessor) button).getHeight();
-    }
+    //$$ public static void width(Widget button, int value) {
+    //$$     button.setWidth(value);
+    //$$ }
+    //$$
+    //$$ public static int width(Widget button) {
+    //$$     return button.getWidth();
+    //$$ }
+    //$$
+    //$$ public static int height(Widget button) {
+    //$$     return ((AbstractButtonWidgetAccessor) button).getHeight();
+    //$$ }
     //#else
-    //$$ public static void width(GuiButton button, int value) {
-    //$$     button.width = value;
-    //$$ }
-    //$$
-    //$$ public static int width(GuiButton button) {
-    //$$     return button.width;
-    //$$ }
-    //$$
-    //$$ public static int height(GuiButton button) {
-    //$$     return button.height;
-    //$$ }
+    public static void width(GuiButton button, int value) {
+        button.width = value;
+    }
+
+    public static int width(GuiButton button) {
+        return button.width;
+    }
+
+    public static int height(GuiButton button) {
+        return button.height;
+    }
     //#endif
 
     //#if FABRIC<=0
@@ -266,60 +266,60 @@ public class MCVer {
     //$$     return event.getButton();
     //$$ }
     //#else
-    //$$ public static void addButton(GuiScreenEvent.InitGuiEvent event, GuiButton button) {
+    public static void addButton(GuiScreenEvent.InitGuiEvent event, GuiButton button) {
         //#if MC>=11400
         //$$ event.addButton(button);
         //#else
-        //$$ getButtonList(event).add(button);
+        getButtonList(event).add(button);
         //#endif
-    //$$ }
-    //$$
-    //$$ public static void removeButton(GuiScreenEvent.InitGuiEvent event, GuiButton button) {
+    }
+
+    public static void removeButton(GuiScreenEvent.InitGuiEvent event, GuiButton button) {
         //#if MC>=11400
         //$$ event.removeButton(button);
         //#else
-        //$$ getButtonList(event).remove(button);
+        getButtonList(event).remove(button);
         //#endif
-    //$$ }
-    //$$
-    //$$ @SuppressWarnings("unchecked")
-    //$$ public static List<GuiButton> getButtonList(GuiScreenEvent.InitGuiEvent event) {
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<GuiButton> getButtonList(GuiScreenEvent.InitGuiEvent event) {
         //#if MC>=10904
         //$$ return event.getButtonList();
         //#else
-        //$$ return event.buttonList;
+        return event.buttonList;
         //#endif
-    //$$ }
-    //$$
-    //$$ public static GuiButton getButton(GuiScreenEvent.ActionPerformedEvent event) {
+    }
+
+    public static GuiButton getButton(GuiScreenEvent.ActionPerformedEvent event) {
         //#if MC>=10904
         //$$ return event.getButton();
         //#else
-        //$$ return event.button;
+        return event.button;
         //#endif
-    //$$ }
+    }
     //#endif
-    //$$
-    //$$ public static Screen getGui(GuiScreenEvent event) {
+
+    public static GuiScreen getGui(GuiScreenEvent event) {
         //#if MC>=10904
         //$$ return event.getGui();
         //#else
-        //$$ return event.gui;
+        return event.gui;
         //#endif
-    //$$ }
-    //$$
-    //$$ public static LivingEntity getEntity(RenderLivingEvent event) {
+    }
+
+    public static EntityLivingBase getEntity(RenderLivingEvent event) {
         //#if MC>=10904
         //$$ return event.getEntity();
         //#else
-        //$$ return event.entity;
+        return event.entity;
         //#endif
-    //$$ }
+    }
     //#endif
 
-    public static String readString(PacketByteBuf buffer, int max) {
+    public static String readString(PacketBuffer buffer, int max) {
         //#if MC>=10800
-        return buffer.readString(max);
+        return buffer.readStringFromBuffer(max);
         //#else
         //$$ try {
         //$$     return buffer.readStringFromBuffer(max);
@@ -330,18 +330,18 @@ public class MCVer {
     }
 
     //#if FABRIC<=0
-    //$$ public static RenderGameOverlayEvent.ElementType getType(RenderGameOverlayEvent event) {
+    public static RenderGameOverlayEvent.ElementType getType(RenderGameOverlayEvent event) {
         //#if MC>=10904
         //$$ return event.getType();
         //#else
-        //$$ return event.type;
+        return event.type;
         //#endif
-    //$$ }
+    }
     //#endif
 
     //#if MC>=10800
-    public static Entity getRenderViewEntity(MinecraftClient mc) {
-        return mc.getCameraEntity();
+    public static Entity getRenderViewEntity(Minecraft mc) {
+        return mc.getRenderViewEntity();
     }
     //#else
     //$$ public static EntityLivingBase getRenderViewEntity(Minecraft mc) {
@@ -350,8 +350,8 @@ public class MCVer {
     //#endif
 
     //#if MC>=10800
-    public static void setRenderViewEntity(MinecraftClient mc, Entity entity) {
-        mc.setCameraEntity(entity);
+    public static void setRenderViewEntity(Minecraft mc, Entity entity) {
+        mc.setRenderViewEntity(entity);
     }
     //#else
     //$$ public static void setRenderViewEntity(Minecraft mc, EntityLivingBase entity) {
@@ -361,24 +361,24 @@ public class MCVer {
 
     public static Entity getRiddenEntity(Entity ridden) {
         //#if MC>=10904
-        return ridden.getVehicle();
+        //$$ return ridden.getRidingEntity();
         //#else
-        //$$ return ridden.ridingEntity;
+        return ridden.ridingEntity;
         //#endif
     }
 
-    public static Iterable<Entity> loadedEntityList(ClientWorld world) {
+    public static Iterable<Entity> loadedEntityList(WorldClient world) {
         //#if MC>=11400
-        return world.getEntities();
+        //$$ return world.getAllEntities();
         //#else
-        //$$ return world.loadedEntityList;
+        return world.loadedEntityList;
         //#endif
     }
 
     @SuppressWarnings("unchecked")
-    public static Collection<Entity>[] getEntityLists(WorldChunk chunk) {
+    public static Collection<Entity>[] getEntityLists(Chunk chunk) {
         //#if MC>=10800
-        return chunk.getEntitySectionArray();
+        return chunk.getEntityLists();
         //#else
         //$$ return chunk.entityLists;
         //#endif
@@ -386,82 +386,82 @@ public class MCVer {
 
     @SuppressWarnings("unchecked")
     //#if MC>=11500
-    public static List<Cuboid> cubeList(ModelPart modelRenderer) {
-        return new ArrayList<>(); // FIXME 1.15
-    }
-    //#else
-    //$$ public static List<Box> cubeList(ModelPart modelRenderer) {
-    //$$     return modelRenderer.boxes;
+    //$$ public static List<Cuboid> cubeList(ModelPart modelRenderer) {
+    //$$     return new ArrayList<>(); // FIXME 1.15
     //$$ }
+    //#else
+    public static List<ModelBox> cubeList(ModelRenderer modelRenderer) {
+        return modelRenderer.cubeList;
+    }
     //#endif
 
     @SuppressWarnings("unchecked")
-    public static List<PlayerEntity> playerEntities(World world) {
+    public static List<EntityPlayer> playerEntities(World world) {
         //#if MC>=11400
-        return (List) world.getPlayers();
+        //$$ return (List) world.getPlayers();
         //#else
-        //$$ return world.playerEntities;
+        return world.playerEntities;
         //#endif
     }
 
     public static boolean isOnMainThread() {
         //#if MC>=11400
-        return getMinecraft().isOnThread();
+        //$$ return getMinecraft().isOnExecutionThread();
         //#else
-        //$$ return getMinecraft().isCallingFromMinecraftThread();
+        return getMinecraft().isCallingFromMinecraftThread();
         //#endif
     }
 
     public static void scheduleOnMainThread(Runnable runnable) {
         //#if MC>=11400
-        getMinecraft().send(runnable);
+        //$$ getMinecraft().enqueue(runnable);
         //#else
-        //$$ getMinecraft().addScheduledTask(runnable);
+        getMinecraft().addScheduledTask(runnable);
         //#endif
     }
 
     //#if MC>=11400
-    public static Window getWindow(MinecraftClient mc) {
+    //$$ public static MainWindow getWindow(Minecraft mc) {
         //#if MC>=11500
-        return mc.getWindow();
+        //$$ return mc.getWindow();
         //#else
-        //$$ return mc.window;
+        //$$ return mc.mainWindow;
         //#endif
-    }
+    //$$ }
     //#endif
 
     //#if MC>=11400
-    public static Window newScaledResolution(MinecraftClient mc) {
-        return getWindow(mc);
-    }
+    //$$ public static MainWindow newScaledResolution(Minecraft mc) {
+    //$$     return getWindow(mc);
+    //$$ }
     //#else
-    //$$ public static ScaledResolution newScaledResolution(Minecraft mc) {
+    public static ScaledResolution newScaledResolution(Minecraft mc) {
     //#if MC>=10809
-    //$$ return new ScaledResolution(mc);
+    return new ScaledResolution(mc);
     //#else
     //$$ return new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
     //#endif
-    //$$ }
+    }
     //#endif
 
     public static
     //#if MC>=11400
-    CompletableFuture<?>
+    //$$ CompletableFuture<?>
     //#else
-    //$$ ListenableFuture<?>
+    ListenableFuture<?>
     //#endif
     setServerResourcePack(File file) {
         //#if MC>=11400
-        return getMinecraft().getResourcePackDownloader().loadServerPack(
-                file
+        //$$ return getMinecraft().getPackFinder().func_217816_a(
+        //$$         file
                 //#if MC>=11600
                 //$$ , ResourcePackSource.PACK_SOURCE_SERVER
                 //#endif
-        );
+        //$$ );
         //#else
-        //$$ ResourcePackRepository repo = getMinecraft().getResourcePackRepository();
+        ResourcePackRepository repo = getMinecraft().getResourcePackRepository();
         //#if MC>=10800
-        //$$ return repo.setServerResourcePack(file);
+        return repo.setResourcePackInstance(file);
         //#else
         //$$ ResourcePackRepositoryAccessor acc = (ResourcePackRepositoryAccessor) repo;
         //$$ acc.setActive(false);
@@ -474,36 +474,36 @@ public class MCVer {
 
     public static <T> void addCallback(
             //#if MC>=11400
-            CompletableFuture<T> future,
+            //$$ CompletableFuture<T> future,
             //#else
-            //$$ ListenableFuture<T> future,
+            ListenableFuture<T> future,
             //#endif
             Consumer<T> success,
             Consumer<Throwable> failure
     ) {
         //#if MC>=11400
-        future.thenAccept(success).exceptionally(throwable -> {
-            failure.accept(throwable);
-            return null;
-        });
-        //#else
-        //$$ Futures.addCallback(future, new FutureCallback<T>() {
-        //$$     @Override
-        //$$     public void onSuccess(T result) {
-        //$$         success.accept(result);
-        //$$     }
-        //$$
-        //$$     @Override
-        //$$     public void onFailure(Throwable throwable) {
-        //$$         failure.accept(throwable);
-        //$$     }
+        //$$ future.thenAccept(success).exceptionally(throwable -> {
+        //$$     failure.accept(throwable);
+        //$$     return null;
         //$$ });
+        //#else
+        Futures.addCallback(future, new FutureCallback<T>() {
+            @Override
+            public void onSuccess(T result) {
+                success.accept(result);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                failure.accept(throwable);
+            }
+        });
         //#endif
     }
 
     //#if MC>=10800
-    public static BufferBuilder Tessellator_getBufferBuilder() {
-        return Tessellator.getInstance().getBuffer();
+    public static WorldRenderer Tessellator_getBufferBuilder() {
+        return Tessellator.getInstance().getWorldRenderer();
     }
     //#else
     //$$ public static Tessellator Tessellator_getBufferBuilder() {
@@ -515,14 +515,14 @@ public class MCVer {
         Tessellator_getBufferBuilder().begin(
                 mode
                 //#if MC>=10809
-                , VertexFormats.POSITION_COLOR
+                , DefaultVertexFormats.POSITION_COLOR
                 //#endif
         );
     }
 
     public static void BufferBuilder_addPosCol(double x, double y, double z, int r, int g, int b, int a) {
         //#if MC>=10809
-        Tessellator_getBufferBuilder().vertex(x, y, z).color(r, g, b, a).next();
+        Tessellator_getBufferBuilder().pos(x, y, z).color(r, g, b, a).endVertex();
         //#else
         //$$ Tessellator_getBufferBuilder().setColorRGBA(r, g, b, a);
         //$$ Tessellator_getBufferBuilder().addVertex(x, y, z);
@@ -533,14 +533,14 @@ public class MCVer {
         Tessellator_getBufferBuilder().begin(
                 mode
                 //#if MC>=10809
-                , VertexFormats.POSITION_TEXTURE
+                , DefaultVertexFormats.POSITION_TEX
                 //#endif
         );
     }
 
     public static void BufferBuilder_addPosTex(double x, double y, double z, float u, float v) {
         //#if MC>=10809
-        Tessellator_getBufferBuilder().vertex(x, y, z).texture(u, v).next();
+        Tessellator_getBufferBuilder().pos(x, y, z).tex(u, v).endVertex();
         //#else
         //$$ Tessellator_getBufferBuilder().addVertexWithUV(x, y, z, u, v);
         //#endif
@@ -550,14 +550,14 @@ public class MCVer {
         Tessellator_getBufferBuilder().begin(
                 mode
                 //#if MC>=10809
-                , VertexFormats.POSITION_TEXTURE_COLOR
+                , DefaultVertexFormats.POSITION_TEX_COLOR
                 //#endif
         );
     }
 
     public static void BufferBuilder_addPosTexCol(double x, double y, double z, float u, float v, int r, int g, int b, int a) {
         //#if MC>=10809
-        Tessellator_getBufferBuilder().vertex(x, y, z).texture(u, v).color(r, g, b, a).next();
+        Tessellator_getBufferBuilder().pos(x, y, z).tex(u, v).color(r, g, b, a).endVertex();
         //#else
         //$$ Tessellator_getBufferBuilder().setColorRGBA(r, g, b, a);
         //$$ Tessellator_getBufferBuilder().addVertexWithUV(x, y, z, u, v);
@@ -579,106 +579,106 @@ public class MCVer {
         //#endif
     }
 
-    public static EntityRenderDispatcher getRenderManager() {
+    public static RenderManager getRenderManager() {
         //#if MC>=10800
-        return getMinecraft().getEntityRenderManager();
+        return getMinecraft().getRenderManager();
         //#else
         //$$ return RenderManager.instance;
         //#endif
     }
 
-    public static MinecraftClient getMinecraft() {
-        return MinecraftClient.getInstance();
+    public static Minecraft getMinecraft() {
+        return Minecraft.getMinecraft();
     }
 
     public static float getRenderPartialTicks() {
-        return ((MinecraftAccessor) getMinecraft()).getTimer().tickDelta;
+        return ((MinecraftAccessor) getMinecraft()).getTimer().renderPartialTicks;
     }
 
     public static void addButton(
-            Screen screen,
+            GuiScreen screen,
             //#if MC>=11400
-            ButtonWidget button
+            //$$ Button button
             //#else
-            //$$ GuiButton button
+            GuiButton button
             //#endif
     ) {
         GuiScreenAccessor acc = (GuiScreenAccessor) screen;
         acc.getButtons().add(button);
         //#if MC>=11400
-        acc.getChildren().add(button);
+        //$$ acc.getChildren().add(button);
         //#endif
     }
 
     //#if MC>=11400
-    public static Optional<AbstractButtonWidget> findButton(List<AbstractButtonWidget> buttonList, @SuppressWarnings("unused") String text, @SuppressWarnings("unused") int id) {
+    //$$ public static Optional<Widget> findButton(List<Widget> buttonList, @SuppressWarnings("unused") String text, @SuppressWarnings("unused") int id) {
         //#if MC>=11600
         //$$ final TranslatableText message = new TranslatableText(text);
         //#else
-        final String message = I18n.translate(text);
+        //$$ final String message = I18n.format(text);
         //#endif
-        for (AbstractButtonWidget b : buttonList) {
-            if (message.equals(b.getMessage())) {
-                return Optional.of(b);
-            }
-        }
-        return Optional.empty();
-    }
-    //#else
-    //$$ public static Optional<GuiButton> findButton(List<GuiButton> buttonList, @SuppressWarnings("unused") String text, int id) {
-    //$$     for (GuiButton b : buttonList) {
-    //$$         if (b.id == id) {
+    //$$     for (Widget b : buttonList) {
+    //$$         if (message.equals(b.getMessage())) {
     //$$             return Optional.of(b);
     //$$         }
     //$$     }
     //$$     return Optional.empty();
     //$$ }
+    //#else
+    public static Optional<GuiButton> findButton(List<GuiButton> buttonList, @SuppressWarnings("unused") String text, int id) {
+        for (GuiButton b : buttonList) {
+            if (b.id == id) {
+                return Optional.of(b);
+            }
+        }
+        return Optional.empty();
+    }
     //#endif
 
     //#if MC>=11400
-    public static void processKeyBinds() {
-        ((MinecraftMethodAccessor) getMinecraft()).replayModProcessKeyBinds();
-    }
+    //$$ public static void processKeyBinds() {
+    //$$     ((MinecraftMethodAccessor) getMinecraft()).replayModProcessKeyBinds();
+    //$$ }
     //#endif
 
     public interface MinecraftMethodAccessor {
         //#if MC>=11400
-        void replayModProcessKeyBinds();
+        //$$ void replayModProcessKeyBinds();
         //#else
         //#if MC>=10904
         //$$ void replayModRunTickMouse();
         //$$ void replayModRunTickKeyboard();
         //#else
-        //$$ void replayModSetEarlyReturnFromRunTick(boolean earlyReturn);
+        void replayModSetEarlyReturnFromRunTick(boolean earlyReturn);
         //#endif
         //#endif
         //#if MC>=11400
-        void replayModExecuteTaskQueue();
+        //$$ void replayModExecuteTaskQueue();
         //#endif
     }
 
     //#if MC>=10800 && MC<11500
-    //$$ public interface ChunkRenderWorkerAccessor {
-    //$$     void doRunTask(ChunkRenderTask task) throws InterruptedException;
-    //$$ }
+    public interface ChunkRenderWorkerAccessor {
+        void doRunTask(ChunkCompileTaskGenerator task) throws InterruptedException;
+    }
     //#endif
 
     public static long milliTime() {
         //#if MC>=11400
-        return Util.getMeasuringTimeMs();
+        //$$ return Util.milliTime();
         //#else
-        //$$ return Minecraft.getSystemTime();
+        return Minecraft.getSystemTime();
         //#endif
     }
 
-    public static void bindTexture(Identifier texture) {
+    public static void bindTexture(ResourceLocation texture) {
         //#if MC>=11500
-        getMinecraft().getTextureManager().bindTexture(texture);
+        //$$ getMinecraft().getTextureManager().bindTexture(texture);
         //#else
         //#if MC>=11400
         //$$ getMinecraft().getTextureManager().bindTexture(texture);
         //#else
-        //$$ getMinecraft().renderEngine.bindTexture(texture);
+        getMinecraft().renderEngine.bindTexture(texture);
         //#endif
         //#endif
     }
@@ -692,59 +692,59 @@ public class MCVer {
     }
 
     //#if MC>=10904
-    // TODO: this can be inlined once https://github.com/SpongePowered/Mixin/issues/305 is fixed
-    public static Vec3d getPosition(Particle particle, float partialTicks) {
-        ParticleAccessor acc = (ParticleAccessor) particle;
-        double x = acc.getPrevPosX() + (acc.getPosX() - acc.getPrevPosX()) * partialTicks;
-        double y = acc.getPrevPosY() + (acc.getPosY() - acc.getPrevPosY()) * partialTicks;
-        double z = acc.getPrevPosZ() + (acc.getPosZ() - acc.getPrevPosZ()) * partialTicks;
-        return new Vec3d(x, y, z);
-    }
+    //$$ // TODO: this can be inlined once https://github.com/SpongePowered/Mixin/issues/305 is fixed
+    //$$ public static Vec3d getPosition(Particle particle, float partialTicks) {
+    //$$     ParticleAccessor acc = (ParticleAccessor) particle;
+    //$$     double x = acc.getPrevPosX() + (acc.getPosX() - acc.getPrevPosX()) * partialTicks;
+    //$$     double y = acc.getPrevPosY() + (acc.getPosY() - acc.getPrevPosY()) * partialTicks;
+    //$$     double z = acc.getPrevPosZ() + (acc.getPosZ() - acc.getPrevPosZ()) * partialTicks;
+    //$$     return new Vec3d(x, y, z);
+    //$$ }
     //#endif
 
     public static void openFile(File file) {
         //#if MC>=11400
-        Util.getOperatingSystem().open(file);
+        //$$ Util.getOSType().openFile(file);
         //#else
-        //$$ String path = file.getAbsolutePath();
-        //$$
-        //$$ // First try OS specific methods
-        //$$ try {
-        //$$     switch (Util.getOSType()) {
-        //$$         case WINDOWS:
-        //$$             Runtime.getRuntime().exec(String.format("cmd.exe /C start \"Open file\" \"%s\"", path));
-        //$$             return;
-        //$$         case OSX:
-        //$$             Runtime.getRuntime().exec(new String[]{"/usr/bin/open", path});
-        //$$             return;
-        //$$     }
-        //$$ } catch (IOException e) {
-        //$$     LogManager.getLogger().error("Cannot open file", e);
-        //$$ }
-        //$$
-        //$$ // Otherwise try to java way
-        //$$ try {
-        //$$     Desktop.getDesktop().browse(file.toURI());
-        //$$ } catch (Throwable throwable) {
-        //$$     // And if all fails, lwjgl
-        //$$     Sys.openURL("file://" + path);
-        //$$ }
+        String path = file.getAbsolutePath();
+
+        // First try OS specific methods
+        try {
+            switch (Util.getOSType()) {
+                case WINDOWS:
+                    Runtime.getRuntime().exec(String.format("cmd.exe /C start \"Open file\" \"%s\"", path));
+                    return;
+                case OSX:
+                    Runtime.getRuntime().exec(new String[]{"/usr/bin/open", path});
+                    return;
+            }
+        } catch (IOException e) {
+            LogManager.getLogger().error("Cannot open file", e);
+        }
+
+        // Otherwise try to java way
+        try {
+            Desktop.getDesktop().browse(file.toURI());
+        } catch (Throwable throwable) {
+            // And if all fails, lwjgl
+            Sys.openURL("file://" + path);
+        }
         //#endif
     }
 
     public static void openURL(URI url) {
         //#if MC>=11400
         //#if MC>=11400
-        Util.getOperatingSystem().open(url);
+        //$$ Util.getOSType().openURI(url);
         //#else
         //$$ Util.getOSType().openURI(url);
         //#endif
         //#else
-        //$$ try {
-        //$$     Desktop.getDesktop().browse(url);
-        //$$ } catch (Throwable e) {
-        //$$     LOGGER.error("Failed to open URL: ", e);
-        //$$ }
+        try {
+            Desktop.getDesktop().browse(url);
+        } catch (Throwable e) {
+            LOGGER.error("Failed to open URL: ", e);
+        }
         //#endif
     }
 
@@ -754,9 +754,9 @@ public class MCVer {
             //$$ return keyBinding.getBoundKeyLocalizedText().getString();
             //#else
             //#if MC>=11400
-            return keyBinding.getLocalizedName();
+            //$$ return keyBinding.getLocalizedName();
             //#else
-            //$$ return Keyboard.getKeyName(keyBinding.getKeyCode());
+            return Keyboard.getKeyName(keyBinding.getKeyCode());
             //#endif
             //#endif
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -765,14 +765,14 @@ public class MCVer {
         }
     }
 
-    public static void playSound(Identifier sound) {
-        getMinecraft().getSoundManager().play(
+    public static void playSound(ResourceLocation sound) {
+        getMinecraft().getSoundHandler().playSound(
                 //#if MC>=11400
-                PositionedSoundInstance.master(new SoundEvent(sound), 1.0F)
+                //$$ SimpleSound.master(new SoundEvent(sound), 1.0F)
                 //#elseif MC>=10904
                 //$$ PositionedSoundRecord.getMasterRecord(new SoundEvent(sound), 1.0F)
                 //#elseif MC>=10800
-                //$$ PositionedSoundRecord.create(sound, 1.0F)
+                PositionedSoundRecord.create(sound, 1.0F)
                 //#else
                 //$$ PositionedSoundRecord.createPositionedSoundRecord(sound, 1.0F)
                 //#endif
@@ -780,22 +780,22 @@ public class MCVer {
     }
 
     //#if MC>=11400
-    private static Boolean hasOptifine;
-    public static boolean hasOptifine() {
-        if (hasOptifine == null) {
-            try {
-                Class.forName("Config");
-                hasOptifine = true;
-            } catch (ClassNotFoundException e) {
-                hasOptifine = false;
-            }
-        }
-        return hasOptifine;
-    }
-    //#else
+    //$$ private static Boolean hasOptifine;
     //$$ public static boolean hasOptifine() {
-    //$$     return FMLClientHandler.instance().hasOptifine();
+    //$$     if (hasOptifine == null) {
+    //$$         try {
+    //$$             Class.forName("Config");
+    //$$             hasOptifine = true;
+    //$$         } catch (ClassNotFoundException e) {
+    //$$             hasOptifine = false;
+    //$$         }
+    //$$     }
+    //$$     return hasOptifine;
     //$$ }
+    //#else
+    public static boolean hasOptifine() {
+        return FMLClientHandler.instance().hasOptifine();
+    }
     //#endif
 
     //#if MC<=10710
@@ -817,121 +817,121 @@ public class MCVer {
 
     public static abstract class Keyboard {
         //#if MC>=11400
-        public static final int KEY_LCONTROL = GLFW.GLFW_KEY_LEFT_CONTROL;
-        public static final int KEY_LSHIFT = GLFW.GLFW_KEY_LEFT_SHIFT;
-        public static final int KEY_ESCAPE = GLFW.GLFW_KEY_ESCAPE;
-        public static final int KEY_HOME = GLFW.GLFW_KEY_HOME;
-        public static final int KEY_END = GLFW.GLFW_KEY_END;
-        public static final int KEY_UP = GLFW.GLFW_KEY_UP;
-        public static final int KEY_DOWN = GLFW.GLFW_KEY_DOWN;
-        public static final int KEY_LEFT = GLFW.GLFW_KEY_LEFT;
-        public static final int KEY_RIGHT = GLFW.GLFW_KEY_RIGHT;
-        public static final int KEY_BACK = GLFW.GLFW_KEY_BACKSPACE;
-        public static final int KEY_DELETE = GLFW.GLFW_KEY_DELETE;
-        public static final int KEY_RETURN = GLFW.GLFW_KEY_ENTER;
-        public static final int KEY_TAB = GLFW.GLFW_KEY_TAB;
-        public static final int KEY_F1 = GLFW.GLFW_KEY_F1;
-        public static final int KEY_A = GLFW.GLFW_KEY_A;
-        public static final int KEY_B = GLFW.GLFW_KEY_B;
-        public static final int KEY_C = GLFW.GLFW_KEY_C;
-        public static final int KEY_D = GLFW.GLFW_KEY_D;
-        public static final int KEY_E = GLFW.GLFW_KEY_E;
-        public static final int KEY_F = GLFW.GLFW_KEY_F;
-        public static final int KEY_G = GLFW.GLFW_KEY_G;
-        public static final int KEY_H = GLFW.GLFW_KEY_H;
-        public static final int KEY_I = GLFW.GLFW_KEY_I;
-        public static final int KEY_J = GLFW.GLFW_KEY_J;
-        public static final int KEY_K = GLFW.GLFW_KEY_K;
-        public static final int KEY_L = GLFW.GLFW_KEY_L;
-        public static final int KEY_M = GLFW.GLFW_KEY_M;
-        public static final int KEY_N = GLFW.GLFW_KEY_N;
-        public static final int KEY_O = GLFW.GLFW_KEY_O;
-        public static final int KEY_P = GLFW.GLFW_KEY_P;
-        public static final int KEY_Q = GLFW.GLFW_KEY_Q;
-        public static final int KEY_R = GLFW.GLFW_KEY_R;
-        public static final int KEY_S = GLFW.GLFW_KEY_S;
-        public static final int KEY_T = GLFW.GLFW_KEY_T;
-        public static final int KEY_U = GLFW.GLFW_KEY_U;
-        public static final int KEY_V = GLFW.GLFW_KEY_V;
-        public static final int KEY_W = GLFW.GLFW_KEY_W;
-        public static final int KEY_X = GLFW.GLFW_KEY_X;
-        public static final int KEY_Y = GLFW.GLFW_KEY_Y;
-        public static final int KEY_Z = GLFW.GLFW_KEY_Z;
+        //$$ public static final int KEY_LCONTROL = GLFW.GLFW_KEY_LEFT_CONTROL;
+        //$$ public static final int KEY_LSHIFT = GLFW.GLFW_KEY_LEFT_SHIFT;
+        //$$ public static final int KEY_ESCAPE = GLFW.GLFW_KEY_ESCAPE;
+        //$$ public static final int KEY_HOME = GLFW.GLFW_KEY_HOME;
+        //$$ public static final int KEY_END = GLFW.GLFW_KEY_END;
+        //$$ public static final int KEY_UP = GLFW.GLFW_KEY_UP;
+        //$$ public static final int KEY_DOWN = GLFW.GLFW_KEY_DOWN;
+        //$$ public static final int KEY_LEFT = GLFW.GLFW_KEY_LEFT;
+        //$$ public static final int KEY_RIGHT = GLFW.GLFW_KEY_RIGHT;
+        //$$ public static final int KEY_BACK = GLFW.GLFW_KEY_BACKSPACE;
+        //$$ public static final int KEY_DELETE = GLFW.GLFW_KEY_DELETE;
+        //$$ public static final int KEY_RETURN = GLFW.GLFW_KEY_ENTER;
+        //$$ public static final int KEY_TAB = GLFW.GLFW_KEY_TAB;
+        //$$ public static final int KEY_F1 = GLFW.GLFW_KEY_F1;
+        //$$ public static final int KEY_A = GLFW.GLFW_KEY_A;
+        //$$ public static final int KEY_B = GLFW.GLFW_KEY_B;
+        //$$ public static final int KEY_C = GLFW.GLFW_KEY_C;
+        //$$ public static final int KEY_D = GLFW.GLFW_KEY_D;
+        //$$ public static final int KEY_E = GLFW.GLFW_KEY_E;
+        //$$ public static final int KEY_F = GLFW.GLFW_KEY_F;
+        //$$ public static final int KEY_G = GLFW.GLFW_KEY_G;
+        //$$ public static final int KEY_H = GLFW.GLFW_KEY_H;
+        //$$ public static final int KEY_I = GLFW.GLFW_KEY_I;
+        //$$ public static final int KEY_J = GLFW.GLFW_KEY_J;
+        //$$ public static final int KEY_K = GLFW.GLFW_KEY_K;
+        //$$ public static final int KEY_L = GLFW.GLFW_KEY_L;
+        //$$ public static final int KEY_M = GLFW.GLFW_KEY_M;
+        //$$ public static final int KEY_N = GLFW.GLFW_KEY_N;
+        //$$ public static final int KEY_O = GLFW.GLFW_KEY_O;
+        //$$ public static final int KEY_P = GLFW.GLFW_KEY_P;
+        //$$ public static final int KEY_Q = GLFW.GLFW_KEY_Q;
+        //$$ public static final int KEY_R = GLFW.GLFW_KEY_R;
+        //$$ public static final int KEY_S = GLFW.GLFW_KEY_S;
+        //$$ public static final int KEY_T = GLFW.GLFW_KEY_T;
+        //$$ public static final int KEY_U = GLFW.GLFW_KEY_U;
+        //$$ public static final int KEY_V = GLFW.GLFW_KEY_V;
+        //$$ public static final int KEY_W = GLFW.GLFW_KEY_W;
+        //$$ public static final int KEY_X = GLFW.GLFW_KEY_X;
+        //$$ public static final int KEY_Y = GLFW.GLFW_KEY_Y;
+        //$$ public static final int KEY_Z = GLFW.GLFW_KEY_Z;
         //#else
-        //$$ public static final int KEY_LCONTROL = org.lwjgl.input.Keyboard.KEY_LCONTROL;
-        //$$ public static final int KEY_LSHIFT = org.lwjgl.input.Keyboard.KEY_LSHIFT;
-        //$$ public static final int KEY_ESCAPE = org.lwjgl.input.Keyboard.KEY_ESCAPE;
-        //$$ public static final int KEY_HOME = org.lwjgl.input.Keyboard.KEY_HOME;
-        //$$ public static final int KEY_END = org.lwjgl.input.Keyboard.KEY_END;
-        //$$ public static final int KEY_UP = org.lwjgl.input.Keyboard.KEY_UP;
-        //$$ public static final int KEY_DOWN = org.lwjgl.input.Keyboard.KEY_DOWN;
-        //$$ public static final int KEY_LEFT = org.lwjgl.input.Keyboard.KEY_LEFT;
-        //$$ public static final int KEY_RIGHT = org.lwjgl.input.Keyboard.KEY_RIGHT;
-        //$$ public static final int KEY_BACK = org.lwjgl.input.Keyboard.KEY_BACK;
-        //$$ public static final int KEY_DELETE = org.lwjgl.input.Keyboard.KEY_DELETE;
-        //$$ public static final int KEY_RETURN = org.lwjgl.input.Keyboard.KEY_RETURN;
-        //$$ public static final int KEY_TAB = org.lwjgl.input.Keyboard.KEY_TAB;
-        //$$ public static final int KEY_F1 = org.lwjgl.input.Keyboard.KEY_F1;
-        //$$ public static final int KEY_A = org.lwjgl.input.Keyboard.KEY_A;
-        //$$ public static final int KEY_B = org.lwjgl.input.Keyboard.KEY_B;
-        //$$ public static final int KEY_C = org.lwjgl.input.Keyboard.KEY_C;
-        //$$ public static final int KEY_D = org.lwjgl.input.Keyboard.KEY_D;
-        //$$ public static final int KEY_E = org.lwjgl.input.Keyboard.KEY_E;
-        //$$ public static final int KEY_F = org.lwjgl.input.Keyboard.KEY_F;
-        //$$ public static final int KEY_G = org.lwjgl.input.Keyboard.KEY_G;
-        //$$ public static final int KEY_H = org.lwjgl.input.Keyboard.KEY_H;
-        //$$ public static final int KEY_I = org.lwjgl.input.Keyboard.KEY_I;
-        //$$ public static final int KEY_J = org.lwjgl.input.Keyboard.KEY_J;
-        //$$ public static final int KEY_K = org.lwjgl.input.Keyboard.KEY_K;
-        //$$ public static final int KEY_L = org.lwjgl.input.Keyboard.KEY_L;
-        //$$ public static final int KEY_M = org.lwjgl.input.Keyboard.KEY_M;
-        //$$ public static final int KEY_N = org.lwjgl.input.Keyboard.KEY_N;
-        //$$ public static final int KEY_O = org.lwjgl.input.Keyboard.KEY_O;
-        //$$ public static final int KEY_P = org.lwjgl.input.Keyboard.KEY_P;
-        //$$ public static final int KEY_Q = org.lwjgl.input.Keyboard.KEY_Q;
-        //$$ public static final int KEY_R = org.lwjgl.input.Keyboard.KEY_R;
-        //$$ public static final int KEY_S = org.lwjgl.input.Keyboard.KEY_S;
-        //$$ public static final int KEY_T = org.lwjgl.input.Keyboard.KEY_T;
-        //$$ public static final int KEY_U = org.lwjgl.input.Keyboard.KEY_U;
-        //$$ public static final int KEY_V = org.lwjgl.input.Keyboard.KEY_V;
-        //$$ public static final int KEY_W = org.lwjgl.input.Keyboard.KEY_W;
-        //$$ public static final int KEY_X = org.lwjgl.input.Keyboard.KEY_X;
-        //$$ public static final int KEY_Y = org.lwjgl.input.Keyboard.KEY_Y;
-        //$$ public static final int KEY_Z = org.lwjgl.input.Keyboard.KEY_Z;
+        public static final int KEY_LCONTROL = org.lwjgl.input.Keyboard.KEY_LCONTROL;
+        public static final int KEY_LSHIFT = org.lwjgl.input.Keyboard.KEY_LSHIFT;
+        public static final int KEY_ESCAPE = org.lwjgl.input.Keyboard.KEY_ESCAPE;
+        public static final int KEY_HOME = org.lwjgl.input.Keyboard.KEY_HOME;
+        public static final int KEY_END = org.lwjgl.input.Keyboard.KEY_END;
+        public static final int KEY_UP = org.lwjgl.input.Keyboard.KEY_UP;
+        public static final int KEY_DOWN = org.lwjgl.input.Keyboard.KEY_DOWN;
+        public static final int KEY_LEFT = org.lwjgl.input.Keyboard.KEY_LEFT;
+        public static final int KEY_RIGHT = org.lwjgl.input.Keyboard.KEY_RIGHT;
+        public static final int KEY_BACK = org.lwjgl.input.Keyboard.KEY_BACK;
+        public static final int KEY_DELETE = org.lwjgl.input.Keyboard.KEY_DELETE;
+        public static final int KEY_RETURN = org.lwjgl.input.Keyboard.KEY_RETURN;
+        public static final int KEY_TAB = org.lwjgl.input.Keyboard.KEY_TAB;
+        public static final int KEY_F1 = org.lwjgl.input.Keyboard.KEY_F1;
+        public static final int KEY_A = org.lwjgl.input.Keyboard.KEY_A;
+        public static final int KEY_B = org.lwjgl.input.Keyboard.KEY_B;
+        public static final int KEY_C = org.lwjgl.input.Keyboard.KEY_C;
+        public static final int KEY_D = org.lwjgl.input.Keyboard.KEY_D;
+        public static final int KEY_E = org.lwjgl.input.Keyboard.KEY_E;
+        public static final int KEY_F = org.lwjgl.input.Keyboard.KEY_F;
+        public static final int KEY_G = org.lwjgl.input.Keyboard.KEY_G;
+        public static final int KEY_H = org.lwjgl.input.Keyboard.KEY_H;
+        public static final int KEY_I = org.lwjgl.input.Keyboard.KEY_I;
+        public static final int KEY_J = org.lwjgl.input.Keyboard.KEY_J;
+        public static final int KEY_K = org.lwjgl.input.Keyboard.KEY_K;
+        public static final int KEY_L = org.lwjgl.input.Keyboard.KEY_L;
+        public static final int KEY_M = org.lwjgl.input.Keyboard.KEY_M;
+        public static final int KEY_N = org.lwjgl.input.Keyboard.KEY_N;
+        public static final int KEY_O = org.lwjgl.input.Keyboard.KEY_O;
+        public static final int KEY_P = org.lwjgl.input.Keyboard.KEY_P;
+        public static final int KEY_Q = org.lwjgl.input.Keyboard.KEY_Q;
+        public static final int KEY_R = org.lwjgl.input.Keyboard.KEY_R;
+        public static final int KEY_S = org.lwjgl.input.Keyboard.KEY_S;
+        public static final int KEY_T = org.lwjgl.input.Keyboard.KEY_T;
+        public static final int KEY_U = org.lwjgl.input.Keyboard.KEY_U;
+        public static final int KEY_V = org.lwjgl.input.Keyboard.KEY_V;
+        public static final int KEY_W = org.lwjgl.input.Keyboard.KEY_W;
+        public static final int KEY_X = org.lwjgl.input.Keyboard.KEY_X;
+        public static final int KEY_Y = org.lwjgl.input.Keyboard.KEY_Y;
+        public static final int KEY_Z = org.lwjgl.input.Keyboard.KEY_Z;
         //#endif
 
         public static boolean hasControlDown() {
-            return Screen.hasControlDown();
+            return GuiScreen.isCtrlKeyDown();
         }
 
         public static boolean isKeyDown(int keyCode) {
             //#if MC>=11500
-            return InputUtil.isKeyPressed(getMinecraft().getWindow().getHandle(), keyCode);
+            //$$ return InputUtil.isKeyPressed(getMinecraft().getWindow().getHandle(), keyCode);
             //#else
             //#if MC>=11400
-            //$$ return InputUtil.isKeyPressed(getMinecraft().window.getHandle(), keyCode);
+            //$$ return InputMappings.isKeyDown(getMinecraft().mainWindow.getHandle(), keyCode);
             //#else
             //#if MC>=11400
             //$$ return InputMappings.isKeyDown(keyCode);
             //#else
-            //$$ return org.lwjgl.input.Keyboard.isKeyDown(keyCode);
+            return org.lwjgl.input.Keyboard.isKeyDown(keyCode);
             //#endif
             //#endif
             //#endif
         }
 
         //#if MC<11400
-        //$$ public static int getEventKey() {
-        //$$     return org.lwjgl.input.Keyboard.getEventKey();
-        //$$ }
-        //$$
-        //$$ public static boolean getEventKeyState() {
-        //$$     return org.lwjgl.input.Keyboard.getEventKeyState();
-        //$$ }
-        //$$
-        //$$ public static String getKeyName(int code) {
-        //$$     return org.lwjgl.input.Keyboard.getKeyName(code);
-        //$$ }
+        public static int getEventKey() {
+            return org.lwjgl.input.Keyboard.getEventKey();
+        }
+
+        public static boolean getEventKeyState() {
+            return org.lwjgl.input.Keyboard.getEventKeyState();
+        }
+
+        public static String getKeyName(int code) {
+            return org.lwjgl.input.Keyboard.getKeyName(code);
+        }
         //#endif
     }
 }

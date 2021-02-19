@@ -11,8 +11,8 @@ import com.replaymod.replaystudio.us.myles.ViaVersion.api.Pair;
 import de.johni0702.minecraft.gui.GuiRenderer;
 import de.johni0702.minecraft.gui.RenderInfo;
 import de.johni0702.minecraft.gui.versions.Image;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.EnumChatFormatting;
 import com.replaymod.core.ReplayMod;
 import com.replaymod.core.SettingsRegistry;
 import com.replaymod.core.gui.GuiReplaySettings;
@@ -40,9 +40,9 @@ import de.johni0702.minecraft.gui.utils.Consumer;
 import de.johni0702.minecraft.gui.utils.lwjgl.Dimension;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadableDimension;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadablePoint;
-import net.minecraft.client.gui.screen.NoticeScreen;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashException;
+import net.minecraft.client.gui.GuiErrorScreen;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.util.ReportedException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -69,9 +69,9 @@ import static com.replaymod.replay.ReplayModReplay.LOGGER;
 import static de.johni0702.minecraft.gui.versions.MCVer.getFontRenderer;
 
 //#if MC>=11400
-import net.minecraft.text.TranslatableText;
+//$$ import net.minecraft.util.text.TranslationTextComponent;
 //#else
-//$$ import net.minecraft.client.resources.I18n;
+import net.minecraft.client.resources.I18n;
 //#endif
 
 public class GuiReplayViewer extends GuiScreen {
@@ -165,14 +165,14 @@ public class GuiReplayViewer extends GuiScreen {
                         } catch (IOException e) {
                             // We failed (might also be their OS)
                             e.printStackTrace();
-                            getMinecraft().openScreen(new NoticeScreen(
+                            getMinecraft().displayGuiScreen(new GuiErrorScreen(
                                     //#if MC>=11400
-                                    GuiReplayViewer.this::display,
-                                    new TranslatableText("replaymod.gui.viewer.delete.failed1"),
-                                    new TranslatableText("replaymod.gui.viewer.delete.failed2")
+                                    //$$ GuiReplayViewer.this::display,
+                                    //$$ new TranslationTextComponent("replaymod.gui.viewer.delete.failed1"),
+                                    //$$ new TranslationTextComponent("replaymod.gui.viewer.delete.failed2")
                                     //#else
-                                    //$$ I18n.format("replaymod.gui.viewer.delete.failed1"),
-                                    //$$ I18n.format("replaymod.gui.viewer.delete.failed2")
+                                    I18n.format("replaymod.gui.viewer.delete.failed1"),
+                                    I18n.format("replaymod.gui.viewer.delete.failed2")
                                     //#endif
                             ));
                             return;
@@ -193,7 +193,7 @@ public class GuiReplayViewer extends GuiScreen {
             String name = entry.name.getText();
             GuiYesNoPopup popup = GuiYesNoPopup.open(GuiReplayViewer.this,
                     new GuiLabel().setI18nText("replaymod.gui.viewer.delete.linea").setColor(Colors.BLACK),
-                    new GuiLabel().setI18nText("replaymod.gui.viewer.delete.lineb", name + Formatting.RESET).setColor(Colors.BLACK)
+                    new GuiLabel().setI18nText("replaymod.gui.viewer.delete.lineb", name + EnumChatFormatting.RESET).setColor(Colors.BLACK)
             ).setYesI18nLabel("replaymod.gui.delete").setNoI18nLabel("replaymod.gui.cancel");
             Futures.addCallback(popup.getFuture(), new FutureCallback<Boolean>() {
                 @Override
@@ -225,7 +225,7 @@ public class GuiReplayViewer extends GuiScreen {
     public final GuiButton cancelButton = new GuiButton().onClick(new Runnable() {
         @Override
         public void run() {
-            getMinecraft().openScreen(null);
+            getMinecraft().displayGuiScreen(null);
         }
     }).setSize(73, 20).setI18nLabel("replaymod.gui.cancel");
 
@@ -246,7 +246,7 @@ public class GuiReplayViewer extends GuiScreen {
         try {
             list.setFolder(mod.getCore().getReplayFolder().toFile());
         } catch (IOException e) {
-            throw new CrashException(CrashReport.create(e, "Getting replay folder"));
+            throw new ReportedException(CrashReport.makeCrashReport(e, "Getting replay folder"));
         }
 
         setTitle(new GuiLabel().setI18nText("replaymod.gui.replayviewer"));
@@ -470,9 +470,9 @@ public class GuiReplayViewer extends GuiScreen {
             if (!filter.isEmpty()) {
                 boolean anyMatches = getListPanel().calcMinSize().getHeight() > 0;
 
-                TextRenderer fontRenderer = getFontRenderer();
+                FontRenderer fontRenderer = getFontRenderer();
                 int filterTextWidth = fontRenderer.getStringWidth(filter);
-                int filterTextHeight = fontRenderer.fontHeight;
+                int filterTextHeight = fontRenderer.FONT_HEIGHT;
                 renderer.drawRect(
                         size.getWidth() - 3 - 2 - filterTextWidth - 2,
                         size.getHeight() - 3 - 2 - filterTextHeight - 2,
@@ -530,7 +530,7 @@ public class GuiReplayViewer extends GuiScreen {
             this.file = file;
             this.renderQueue = renderQueue;
 
-            name.setText(Formatting.UNDERLINE + Utils.fileNameToReplayName(file.getName()));
+            name.setText(EnumChatFormatting.UNDERLINE + Utils.fileNameToReplayName(file.getName()));
             if (!StringUtils.isEmpty(metaData.getCustomServerName())) {
                 server.setText(metaData.getCustomServerName());
             } else if (StringUtils.isEmpty(metaData.getServerName())

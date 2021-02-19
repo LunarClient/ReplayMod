@@ -4,10 +4,10 @@ import de.johni0702.minecraft.gui.utils.lwjgl.vector.Matrix3f;
 import de.johni0702.minecraft.gui.utils.lwjgl.vector.Matrix4f;
 import de.johni0702.minecraft.gui.utils.lwjgl.vector.Quaternion;
 import de.johni0702.minecraft.gui.utils.lwjgl.vector.Vector3f;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.GlAllocationUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import org.blender.dna.Link;
 import org.blender.dna.ListBase;
 import org.blender.utils.BlenderFactory;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 
 //#if MC>=11400
-import net.minecraft.util.math.Vec3d;
+//$$ import net.minecraft.util.math.Vec3d;
 //#endif
 
 public class Util {
@@ -39,13 +39,13 @@ public class Util {
         }
     }
 
-    private static FloatBuffer floatBuffer = GlAllocationUtils.allocateFloatBuffer(16);
+    private static FloatBuffer floatBuffer = GLAllocation.createDirectFloatBuffer(16);
     public static Matrix4f getGlMatrix(int matrix) {
         floatBuffer.clear();
         //#if MC>=11400
-        GL11.glGetFloatv(matrix, floatBuffer);
+        //$$ GL11.glGetFloatv(matrix, floatBuffer);
         //#else
-        //$$ GL11.glGetFloat(matrix, floatBuffer);
+        GL11.glGetFloat(matrix, floatBuffer);
         //#endif
         floatBuffer.rewind();
         Matrix4f mat = new Matrix4f();
@@ -138,16 +138,16 @@ public class Util {
 
     //#if MC>=10800
     public static Vector3f getCameraPos() {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getMinecraft();
         //#if MC>=11400
-        Vec3d pos = mc.getEntityRenderManager().camera.getPos();
-        return new Vector3f((float) pos.x, (float) pos.y, (float) pos.z);
+        //$$ Vec3d pos = mc.getRenderManager().info.getProjectedView();
+        //$$ return new Vector3f((float) pos.x, (float) pos.y, (float) pos.z);
         //#else
-        //$$ return new Vector3f(
-        //$$         (float) -mc.getRenderManager().viewerPosX,
-        //$$         (float) -mc.getRenderManager().viewerPosY,
-        //$$         (float) -mc.getRenderManager().viewerPosZ
-        //$$ );
+        return new Vector3f(
+                (float) -mc.getRenderManager().viewerPosX,
+                (float) -mc.getRenderManager().viewerPosY,
+                (float) -mc.getRenderManager().viewerPosZ
+        );
         //#endif
     }
     //#endif
@@ -182,12 +182,12 @@ public class Util {
         }
     }
 
-    public static String getTileEntityId(BlockEntity tileEntity) {
-        CompoundTag nbt = new CompoundTag();
+    public static String getTileEntityId(TileEntity tileEntity) {
+        NBTTagCompound nbt = new NBTTagCompound();
         //#if MC>=11400
-        tileEntity.toTag(nbt);
+        //$$ tileEntity.write(nbt);
         //#else
-        //$$ tileEntity.writeToNBT(nbt);
+        tileEntity.writeToNBT(nbt);
         //#endif
         return nbt.getString("id");
     }

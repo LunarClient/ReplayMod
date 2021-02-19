@@ -1,12 +1,12 @@
 package com.replaymod.recording.mixin;
 
-import net.minecraft.client.gui.screen.AddServerScreen;
-import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.gui.GuiScreenAddServer;
+import net.minecraft.client.multiplayer.ServerData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AddServerScreen.class)
+@Mixin(GuiScreenAddServer.class)
 public interface AddServerScreenAccessor {
-    @Accessor
-    ServerInfo getServer();
+    @Accessor("serverData")
+    ServerData getServer();
 }

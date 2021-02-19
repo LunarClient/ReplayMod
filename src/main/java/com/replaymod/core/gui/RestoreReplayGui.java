@@ -20,7 +20,7 @@ import de.johni0702.minecraft.gui.layout.CustomLayout;
 import de.johni0702.minecraft.gui.layout.HorizontalLayout;
 import de.johni0702.minecraft.gui.layout.VerticalLayout;
 import de.johni0702.minecraft.gui.utils.Colors;
-import net.minecraft.util.crash.CrashReport;
+import net.minecraft.crash.CrashReport;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -99,7 +99,7 @@ public class RestoreReplayGui extends AbstractGuiScreen<RestoreReplayGui> {
                 tryRecover(progressBar::setProgress);
             } catch (IOException e) {
                 LOGGER.error("Recovering replay file:", e);
-                CrashReport crashReport = CrashReport.create(e, "Recovering replay file");
+                CrashReport crashReport = CrashReport.makeCrashReport(e, "Recovering replay file");
                 core.runLater(() -> Utils.error(LOGGER, VanillaGuiScreen.wrap(getMinecraft().currentScreen), crashReport, () -> {}));
             } finally {
                 core.runLater(() -> core.getBackgroundProcesses().removeProcess(savingProcess));

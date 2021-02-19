@@ -20,8 +20,8 @@ import com.replaymod.replay.gui.screen.GuiModCompatWarning;
 import com.replaymod.replay.handler.GuiHandler;
 import com.replaymod.replaystudio.data.Marker;
 import com.replaymod.replaystudio.replay.ReplayFile;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -71,8 +71,8 @@ public class ReplayModReplay implements Module {
                         marker.setX(Entity_getX(camera));
                         marker.setY(Entity_getY(camera));
                         marker.setZ(Entity_getZ(camera));
-                        marker.setYaw(camera.yaw);
-                        marker.setPitch(camera.pitch);
+                        marker.setYaw(camera.rotationYaw);
+                        marker.setPitch(camera.rotationPitch);
                         marker.setRoll(camera.roll);
                         replayHandler.getOverlay().timeline.addMarker(marker);
                     }
@@ -84,7 +84,7 @@ public class ReplayModReplay implements Module {
             @Override
             public void run() {
                 if (replayHandler != null) {
-                    MinecraftClient mc = MCVer.getMinecraft();
+                    Minecraft mc = MCVer.getMinecraft();
                     ListenableFuture<NoGuiScreenshot> future = NoGuiScreenshot.take(mc, 1280, 720);
                     Futures.addCallback(future, new FutureCallback<NoGuiScreenshot>() {
                         @Override
@@ -189,7 +189,7 @@ public class ReplayModReplay implements Module {
         }
         replayHandler = new ReplayHandler(replayFile, asyncMode);
         //#if MC>=11400
-        KeyBinding.updateKeysByCode(); // see Mixin_ContextualKeyBindings
+        //$$ KeyBinding.resetKeyBindingArrayAndHash(); // see Mixin_ContextualKeyBindings
         //#endif
 
         return replayHandler;
@@ -198,7 +198,7 @@ public class ReplayModReplay implements Module {
     public void forcefullyStopReplay() {
         replayHandler = null;
         //#if MC>=11400
-        KeyBinding.updateKeysByCode(); // see Mixin_ContextualKeyBindings
+        //$$ KeyBinding.resetKeyBindingArrayAndHash(); // see Mixin_ContextualKeyBindings
         //#endif
     }
 

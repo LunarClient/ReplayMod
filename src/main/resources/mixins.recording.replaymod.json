@@ -12,14 +12,14 @@
     "SPacketSpawnPlayerAccessor",
     "MixinServerInfo",
     //#if MC>=11400
-    "MixinDownloadingPackFinder",
-    "MixinMouseHelper",
+    //$$ "MixinDownloadingPackFinder",
+    //$$ "MixinMouseHelper",
     //#endif
     //#if MC>=10904
     //#if MC<11400
     //$$ "MixinPlayerControllerMP",
     //#endif
-    "MixinWorldClient",
+    //$$ "MixinWorldClient",
     //#endif
     //#if MC<=10710
     //$$ "MixinGuiScreen",
@@ -28,7 +28,7 @@
     "MixinNetHandlerLoginClient",
     "MixinNetHandlerPlayClient",
     //#if MC<11400
-    //$$ "MixinNetworkDispatcher",
+    "MixinNetworkDispatcher",
     //#endif
     "MixinRenderGlobal"
   ],

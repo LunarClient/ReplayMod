@@ -1,26 +1,26 @@
 package com.replaymod.core.utils;
 
 import com.replaymod.replaystudio.data.ModInfo;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 //#if FABRIC>=1
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.util.registry.Registry;
+//$$ import net.fabricmc.loader.api.FabricLoader;
+//$$ import net.fabricmc.loader.api.ModContainer;
+//$$ import net.minecraft.util.registry.Registry;
 //#else
 //#if MC>=11200
 //$$ import net.minecraftforge.registries.ForgeRegistry;
 //$$ import net.minecraftforge.registries.RegistryManager;
 //#else
-//$$ import net.minecraftforge.fml.common.registry.GameData;
-//$$ import java.util.stream.Stream;
+import net.minecraftforge.fml.common.registry.GameData;
+import java.util.stream.Stream;
 //#endif
-//$$
+
 //#if MC>=11400
 //$$ import net.minecraftforge.fml.ModList;
 //#else
-//$$ import net.minecraftforge.fml.common.Loader;
-//$$ import net.minecraftforge.fml.common.ModContainer;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 //#endif
 //#endif
 
@@ -33,12 +33,12 @@ public class ModCompat {
     public static Collection<ModInfo> getInstalledNetworkMods() {
         //#if MC>=11400
         //#if FABRIC>=1
-        Map<String, ModInfo> modInfoMap = FabricLoader.getInstance().getAllMods().stream()
-                .map(ModContainer::getMetadata)
-                .map(m -> new ModInfo(m.getId(), m.getName(), m.getVersion().toString()))
-                .collect(Collectors.toMap(ModInfo::getId, Function.identity()));
-        return Registry.REGISTRIES.stream()
-                .map(Registry::getIds).flatMap(Set::stream)
+        //$$ Map<String, ModInfo> modInfoMap = FabricLoader.getInstance().getAllMods().stream()
+        //$$         .map(ModContainer::getMetadata)
+        //$$         .map(m -> new ModInfo(m.getId(), m.getName(), m.getVersion().toString()))
+        //$$         .collect(Collectors.toMap(ModInfo::getId, Function.identity()));
+        //$$ return Registry.REGISTRIES.stream()
+        //$$         .map(Registry::getIds).flatMap(Set::stream)
         //#else
         //$$ Map<String, ModInfo> modInfoMap = ModList.get().getMods().stream()
         //$$         .map(m -> new ModInfo(m.getModId(), m.getDisplayName(), m.getVersion().toString()))
@@ -47,12 +47,12 @@ public class ModCompat {
         //$$         .map(RegistryManager.ACTIVE::getRegistry)
         //$$         .map(ForgeRegistry::getKeys).flatMap(Set::stream)
         //#endif
-                .map(Identifier::getNamespace).filter(s -> !s.equals("minecraft")).distinct()
-                .map(modInfoMap::get).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        //$$         .map(ResourceLocation::getNamespace).filter(s -> !s.equals("minecraft")).distinct()
+        //$$         .map(modInfoMap::get).filter(Objects::nonNull)
+        //$$         .collect(Collectors.toList());
         //#else
-        //$$ Map<String, ModContainer> ignoreCaseMap = Loader.instance().getModList().stream()
-        //$$         .collect(Collectors.toMap(m -> m.getModId().toLowerCase(), Function.identity()));
+        Map<String, ModContainer> ignoreCaseMap = Loader.instance().getModList().stream()
+                .collect(Collectors.toMap(m -> m.getModId().toLowerCase(), Function.identity()));
         //#if MC>=11200
         //$$ return RegistryManager.ACTIVE.takeSnapshot(false).keySet().stream()
         //$$         .map(RegistryManager.ACTIVE::getRegistry)
@@ -63,13 +63,13 @@ public class ModCompat {
         //$$         .collect(Collectors.toList());
         //#else
         //#if MC>=10800
-        //$$ return Stream.concat(
-        //$$         ((Set<ResourceLocation>) GameData.getBlockRegistry().getKeys()).stream(),
-        //$$         ((Set<ResourceLocation>) GameData.getItemRegistry().getKeys()).stream()
-        //$$ ).map(ResourceLocation::getResourceDomain).filter(s -> !s.equals("minecraft")).distinct()
-        //$$         .map(String::toLowerCase).map(ignoreCaseMap::get).filter(mod -> mod != null)
-        //$$         .map(mod -> new ModInfo(mod.getModId(), mod.getName(), mod.getVersion()))
-        //$$         .collect(Collectors.toList());
+        return Stream.concat(
+                ((Set<ResourceLocation>) GameData.getBlockRegistry().getKeys()).stream(),
+                ((Set<ResourceLocation>) GameData.getItemRegistry().getKeys()).stream()
+        ).map(ResourceLocation::getResourceDomain).filter(s -> !s.equals("minecraft")).distinct()
+                .map(String::toLowerCase).map(ignoreCaseMap::get).filter(mod -> mod != null)
+                .map(mod -> new ModInfo(mod.getModId(), mod.getName(), mod.getVersion()))
+                .collect(Collectors.toList());
         //#else
         //$$ return Stream.concat(
         //$$         ((Set<String>) GameData.getBlockRegistry().getKeys()).stream(),

@@ -12,21 +12,21 @@ import de.johni0702.minecraft.gui.element.GuiButton;
 import de.johni0702.minecraft.gui.layout.CustomLayout;
 import de.johni0702.minecraft.gui.layout.HorizontalLayout;
 import de.johni0702.minecraft.gui.utils.EventRegistrations;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.gui.GuiScreen;
 
 //#if FABRIC>=1
-import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
+//$$ import de.johni0702.minecraft.gui.versions.callbacks.InitScreenCallback;
 //#else
-//$$ import net.minecraftforge.client.event.GuiScreenEvent;
-//$$ import net.minecraftforge.common.MinecraftForge;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
-//$$
-//$$ import static com.replaymod.core.versions.MCVer.getGui;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import static com.replaymod.core.versions.MCVer.getGui;
 //#endif
 
 //#if MC>=11400
-import net.minecraft.client.gui.widget.AbstractButtonWidget;
+//$$ import net.minecraft.client.gui.widget.Widget;
 //#endif
 
 import java.util.List;
@@ -86,26 +86,26 @@ public class GuiRecordingControls extends EventRegistrations {
     }
 
     //#if FABRIC>=1
-    { on(InitScreenCallback.EVENT, this::injectIntoIngameMenu); }
-    private void injectIntoIngameMenu(Screen guiScreen, List<AbstractButtonWidget> buttonList) {
+    //$$ { on(InitScreenCallback.EVENT, this::injectIntoIngameMenu); }
+    //$$ private void injectIntoIngameMenu(Screen guiScreen, List<AbstractButtonWidget> buttonList) {
     //#else
-    //$$ @SubscribeEvent
-    //$$ public void injectIntoIngameMenu(GuiScreenEvent.InitGuiEvent.Post event) {
-    //$$     Screen guiScreen = getGui(event);
+    @SubscribeEvent
+    public void injectIntoIngameMenu(GuiScreenEvent.InitGuiEvent.Post event) {
+        GuiScreen guiScreen = getGui(event);
         //#if MC>=11400
         //$$ List<Widget> buttonList = MCVer.getButtonList(event);
         //#else
-        //$$ List<net.minecraft.client.gui.GuiButton> buttonList = MCVer.getButtonList(event);
+        List<net.minecraft.client.gui.GuiButton> buttonList = MCVer.getButtonList(event);
         //#endif
     //#endif
-        if (!(guiScreen instanceof GameMenuScreen)) {
+        if (!(guiScreen instanceof GuiIngameMenu)) {
             return;
         }
         Function<Integer, Integer> yPos =
                 MCVer.findButton(buttonList, "menu.returnToMenu", 1)
                         .map(Optional::of)
                         .orElse(MCVer.findButton(buttonList, "menu.disconnect", 1))
-                        .<Function<Integer, Integer>>map(it -> (height) -> it.y)
+                        .<Function<Integer, Integer>>map(it -> (height) -> it.yPosition)
                         .orElse((height) -> height / 4 + 120 - 16);
         VanillaGuiScreen vanillaGui = VanillaGuiScreen.wrap(guiScreen);
         vanillaGui.setLayout(new CustomLayout<de.johni0702.minecraft.gui.container.GuiScreen>(vanillaGui.getLayout()) {

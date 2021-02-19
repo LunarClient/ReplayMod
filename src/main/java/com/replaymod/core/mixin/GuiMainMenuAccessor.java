@@ -1,16 +1,16 @@
 package com.replaymod.core.mixin;
 
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(TitleScreen.class)
+@Mixin(GuiMainMenu.class)
 public interface GuiMainMenuAccessor {
     //#if MC>=10904
-    @Accessor("realmsNotificationGui")
-    Screen getRealmsNotification();
-    @Accessor("realmsNotificationGui")
-    void setRealmsNotification(Screen value);
+    //$$ @Accessor
+    //$$ GuiScreen getRealmsNotification();
+    //$$ @Accessor
+    //$$ void setRealmsNotification(GuiScreen value);
     //#endif
 }

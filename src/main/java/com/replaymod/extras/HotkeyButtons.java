@@ -16,8 +16,8 @@ import de.johni0702.minecraft.gui.layout.GridLayout;
 import de.johni0702.minecraft.gui.layout.LayoutData;
 import de.johni0702.minecraft.gui.utils.EventRegistrations;
 import de.johni0702.minecraft.gui.utils.lwjgl.ReadableDimension;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +66,7 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
 
             final KeyBindingRegistry keyBindingRegistry = mod.getKeyBindingRegistry();
             keyBindingRegistry.getBindings().values().stream()
-                    .sorted(Comparator.comparing(it -> I18n.translate(it.name)))
+                    .sorted(Comparator.comparing(it -> I18n.format(it.name)))
                     .forEachOrdered(keyBinding -> {
                 GuiButton button = new GuiButton(){
                     @Override
@@ -76,8 +76,8 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
 
                         if (keyBinding.supportsAutoActivation()) {
                             setTooltip(new GuiTooltip().setText(new String[]{
-                                    I18n.translate("replaymod.gui.ingame.autoactivating"),
-                                    I18n.translate("replaymod.gui.ingame.autoactivating."
+                                    I18n.format("replaymod.gui.ingame.autoactivating"),
+                                    I18n.format("replaymod.gui.ingame.autoactivating."
                                             + (keyBinding.isAutoActivating() ? "disable" : "enable")),
                             }));
                             setLabelColor(keyBinding.isAutoActivating() ? 0x00ff00 : 0xe0e0e0);
@@ -86,7 +86,7 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
                         super.draw(renderer, size, renderInfo);
                     }
                 }.onClick(() -> {
-                    if (keyBinding.supportsAutoActivation() && Screen.hasControlDown()) {
+                    if (keyBinding.supportsAutoActivation() && GuiScreen.isCtrlKeyDown()) {
                         keyBinding.setAutoActivating(!keyBinding.isAutoActivating());
                     } else {
                         keyBinding.trigger();

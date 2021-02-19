@@ -8,11 +8,11 @@ import de.johni0702.minecraft.gui.element.GuiButton;
 import de.johni0702.minecraft.gui.utils.EventRegistrations;
 
 //#if FABRIC>=1
-import de.johni0702.minecraft.gui.versions.callbacks.OpenGuiScreenCallback;
-import net.minecraft.client.gui.screen.Screen;
+//$$ import de.johni0702.minecraft.gui.versions.callbacks.OpenGuiScreenCallback;
+//$$ import net.minecraft.client.gui.screen.Screen;
 //#else
-//$$ import net.minecraftforge.client.event.GuiScreenEvent;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 //#endif
 
 import static com.replaymod.core.versions.MCVer.*;
@@ -24,12 +24,12 @@ public class YoutubeUpload extends EventRegistrations implements Extra {
     }
 
     //#if FABRIC>=1
-    { on(OpenGuiScreenCallback.EVENT, this::onGuiOpen); }
-    private void onGuiOpen(Screen vanillaGui) {
+    //$$ { on(OpenGuiScreenCallback.EVENT, this::onGuiOpen); }
+    //$$ private void onGuiOpen(Screen vanillaGui) {
     //#else
-    //$$ @SubscribeEvent
-    //$$ public void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
-    //$$     net.minecraft.client.gui.screen.Screen vanillaGui = getGui(event);
+    @SubscribeEvent
+    public void onGuiOpen(GuiScreenEvent.InitGuiEvent.Post event) {
+        net.minecraft.client.gui.GuiScreen vanillaGui = getGui(event);
     //#endif
         if (GuiScreen.from(vanillaGui) instanceof GuiRenderingDone) {
             GuiRenderingDone gui = (GuiRenderingDone) GuiScreen.from(vanillaGui);

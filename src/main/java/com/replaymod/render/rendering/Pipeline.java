@@ -5,14 +5,14 @@ import com.replaymod.core.versions.MCVer;
 import com.replaymod.render.capturer.WorldRenderer;
 import com.replaymod.render.frame.BitmapFrame;
 import com.replaymod.render.processor.GlToAbsoluteDepthProcessor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.util.ReportedException;
 
 //#if MC>=11400
-import org.lwjgl.glfw.GLFW;
+//$$ import org.lwjgl.glfw.GLFW;
 //#else
-//$$ import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.Display;
 //#endif
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.replaymod.core.versions.MCVer.getMinecraft;
 //#if MC>=11400
-import static com.replaymod.core.versions.MCVer.getWindow;
+//$$ import static com.replaymod.core.versions.MCVer.getWindow;
 //#endif
 
 public class Pipeline<R extends Frame, P extends Frame> implements Runnable {
@@ -46,7 +46,7 @@ public class Pipeline<R extends Frame, P extends Frame> implements Runnable {
         this.consumer = consumer;
 
         float near = 0.05f;
-        float far = getMinecraft().options.viewDistance * 16 * 4;
+        float far = getMinecraft().gameSettings.renderDistanceChunks * 16 * 4;
         this.depthProcessor = new GlToAbsoluteDepthProcessor(near, far);
     }
 
@@ -70,12 +70,12 @@ public class Pipeline<R extends Frame, P extends Frame> implements Runnable {
                     }
                 }, new ThreadPoolExecutor.DiscardPolicy());
 
-        MinecraftClient mc = MCVer.getMinecraft();
+        Minecraft mc = MCVer.getMinecraft();
         while (!capturer.isDone() && !abort) {
             //#if MC>=11400
-            if (GLFW.glfwWindowShouldClose(getWindow(mc).getHandle()) || ((MinecraftAccessor) mc).getCrashReporter() != null) {
+            //$$ if (GLFW.glfwWindowShouldClose(getWindow(mc).getHandle()) || ((MinecraftAccessor) mc).getCrashReporter() != null) {
             //#else
-            //$$ if (Display.isCloseRequested() || ((MinecraftAccessor) mc).getCrashReporter() != null) {
+            if (Display.isCloseRequested() || ((MinecraftAccessor) mc).getCrashReporter() != null) {
             //#endif
                 processService.shutdown();
                 return;
@@ -99,8 +99,8 @@ public class Pipeline<R extends Frame, P extends Frame> implements Runnable {
             processor.close();
             consumer.close();
         } catch (Throwable t) {
-            CrashReport crashReport = CrashReport.create(t, "Cleaning up rendering pipeline");
-            throw new CrashException(crashReport);
+            CrashReport crashReport = CrashReport.makeCrashReport(t, "Cleaning up rendering pipeline");
+            throw new ReportedException(crashReport);
         }
     }
 
@@ -144,8 +144,8 @@ public class Pipeline<R extends Frame, P extends Frame> implements Runnable {
                     consumerLock.notifyAll();
                 }
             } catch (Throwable t) {
-                CrashReport crashReport = CrashReport.create(t, "Processing frame");
-                MCVer.getMinecraft().setCrashReport(crashReport);
+                CrashReport crashReport = CrashReport.makeCrashReport(t, "Processing frame");
+                MCVer.getMinecraft().crashed(crashReport);
             }
         }
     }

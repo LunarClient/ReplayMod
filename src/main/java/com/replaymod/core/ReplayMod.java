@@ -20,32 +20,32 @@ import com.replaymod.replaystudio.util.I18n;
 import com.replaymod.replaystudio.viaversion.ViaVersionPacketConverter;
 import com.replaymod.simplepathing.ReplayModSimplePathing;
 import de.johni0702.minecraft.gui.container.GuiScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.Identifier;
-import net.minecraft.resource.DirectoryResourcePack;
-import net.minecraft.text.Text;
-import net.minecraft.text.Style;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.crash.CrashException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.FolderResourcePack;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ReportedException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
 
 //#if MC>=11400
-import net.minecraft.client.options.Option;
-import net.minecraft.util.thread.ReentrantThreadExecutor;
+//$$ import net.minecraft.client.settings.AbstractOption;
+//$$ import net.minecraft.util.concurrent.RecursiveEventLoop;
 //#endif
 
 //#if FABRIC>=1
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
+//$$ import net.fabricmc.api.ClientModInitializer;
+//$$ import net.fabricmc.loader.api.FabricLoader;
 //#else
-//$$ import com.google.common.util.concurrent.ListenableFutureTask;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
-//$$ import java.util.Queue;
-//$$ import java.util.concurrent.FutureTask;
-//$$
+import com.google.common.util.concurrent.ListenableFutureTask;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import java.util.Queue;
+import java.util.concurrent.FutureTask;
+
 //#if MC>=11400
 //$$ import com.replaymod.core.versions.LangResourcePack;
 //$$ import net.minecraft.resources.IPackFinder;
@@ -56,34 +56,34 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 //$$ import net.minecraftforge.versions.mcp.MCPVersion;
 //#else
-//$$ import static com.replaymod.core.versions.MCVer.FML_BUS;
-//$$ import net.minecraft.client.resources.IResourcePack;
-//$$ import net.minecraftforge.common.config.Configuration;
+import static com.replaymod.core.versions.MCVer.FML_BUS;
+import net.minecraft.client.resources.IResourcePack;
+import net.minecraftforge.common.config.Configuration;
 //#endif
-//$$
+
 //#if MC>=10800
-//$$ import net.minecraft.client.GameSettings;
+import net.minecraft.client.settings.GameSettings;
 //#endif
-//$$
+
 //#if MC>=11400
 //$$ import net.minecraftforge.fml.ModList;
 //#else
-//$$ import net.minecraftforge.fml.common.Loader;
-//$$ import net.minecraftforge.fml.common.Mod.EventHandler;
-//$$ import net.minecraftforge.fml.common.Mod.Instance;
-//$$ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-//$$ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 //#if MC>=10800
-//$$ import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.client.FMLClientHandler;
 //#else
 //$$ import com.replaymod.replay.InputReplayTimer;
 //$$
 //$$ import java.util.ArrayDeque;
 //#endif
 //#endif
-//$$ import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 //#if MC<11400
-//$$ import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 //#endif
 //#endif
 
@@ -109,48 +109,48 @@ import java.util.concurrent.TimeoutException;
 //#if MC>=11400
 //$$ @Mod(ReplayMod.MOD_ID)
 //#else
-//$$ @Mod(modid = ReplayMod.MOD_ID,
-//$$         useMetadata = true,
-//$$         version = "@MOD_VERSION@",
-//$$         acceptedMinecraftVersions = "@MC_VERSION@",
-//$$         acceptableRemoteVersions = "*",
+@Mod(modid = ReplayMod.MOD_ID,
+        useMetadata = true,
+        version = "@MOD_VERSION@",
+        acceptedMinecraftVersions = "@MC_VERSION@",
+        acceptableRemoteVersions = "*",
         //#if MC>=10800
-        //$$ clientSideOnly = true,
-        //$$ updateJSON = "https://raw.githubusercontent.com/ReplayMod/ReplayMod/master/versions.json",
+        clientSideOnly = true,
+        updateJSON = "https://raw.githubusercontent.com/ReplayMod/ReplayMod/master/versions.json",
         //#endif
-//$$         guiFactory = "com.replaymod.core.gui.GuiFactory")
+        guiFactory = "com.replaymod.core.gui.GuiFactory")
 //#endif
 //#endif
 public class ReplayMod implements
         //#if FABRIC>=1
-        ClientModInitializer,
+        //$$ ClientModInitializer,
         //#endif
         Module
 {
 
     public static String getMinecraftVersion() {
         //#if MC>=11400
-        return MinecraftClient.getInstance().getGame().getVersion().getName();
+        //$$ return Minecraft.getInstance().getMinecraftGame().getVersion().getName();
         //#else
         //#if MC>=11400
         //$$ return MCPVersion.getMCVersion();
         //#else
-        //$$ return Loader.MC_VERSION;
+        return Loader.MC_VERSION;
         //#endif
         //#endif
     }
 
     public static final String MOD_ID = "replaymod";
 
-    public static final Identifier TEXTURE = new Identifier("replaymod", "replay_gui.png");
+    public static final ResourceLocation TEXTURE = new ResourceLocation("replaymod", "replay_gui.png");
     public static final int TEXTURE_SIZE = 256;
-    public static final Identifier LOGO_FAVICON = new Identifier("replaymod", "favicon_logo.png");
+    public static final ResourceLocation LOGO_FAVICON = new ResourceLocation("replaymod", "favicon_logo.png");
 
-    private static final MinecraftClient mc = MCVer.getMinecraft();
+    private static final Minecraft mc = MCVer.getMinecraft();
 
     //#if MC<11400
-    //$$ @Deprecated
-    //$$ public static Configuration config;
+    @Deprecated
+    public static Configuration config;
     //#endif
 
     private final KeyBindingRegistry keyBindingRegistry = new KeyBindingRegistry();
@@ -161,9 +161,9 @@ public class ReplayMod implements
 
     // The instance of your mod that Forge uses.
     //#if MC>=11400
-    { instance = this; }
+    //$$ { instance = this; }
     //#else
-    //$$ @Instance(MOD_ID)
+    @Instance(MOD_ID)
     //#endif
     public static ReplayMod instance;
 
@@ -182,13 +182,13 @@ public class ReplayMod implements
     private boolean minimalMode;
 
     public ReplayMod() {
-        I18n.setI18n(net.minecraft.client.resource.language.I18n::translate);
+        I18n.setI18n(net.minecraft.client.resources.I18n::format);
 
         //#if MC>=11400
-        // Check Minecraft protocol version for compatibility
-        if (!ProtocolVersion.isRegistered(MCVer.getProtocolVersion()) && !Boolean.parseBoolean(System.getProperty("replaymod.skipversioncheck", "false"))) {
-            minimalMode = true;
-        }
+        //$$ // Check Minecraft protocol version for compatibility
+        //$$ if (!ProtocolVersion.isRegistered(MCVer.getProtocolVersion()) && !Boolean.parseBoolean(System.getProperty("replaymod.skipversioncheck", "false"))) {
+        //$$     minimalMode = true;
+        //$$ }
         //#endif
 
         // Register all RM modules
@@ -203,18 +203,18 @@ public class ReplayMod implements
         modules.add(new ReplayModCompat());
 
         //#if MC>=11400
-        settingsRegistry.register();
+        //$$ settingsRegistry.register();
         //#endif
     }
 
     //#if MC<=11400
-    //$$ @EventHandler
-    //$$ public void init(FMLPreInitializationEvent event) {
-    //$$     config = new Configuration(event.getSuggestedConfigurationFile());
-    //$$     config.load();
-    //$$     settingsRegistry.setConfiguration(config);
-    //$$     settingsRegistry.save(); // Save default values to disk
-    //$$ }
+    @EventHandler
+    public void init(FMLPreInitializationEvent event) {
+        config = new Configuration(event.getSuggestedConfigurationFile());
+        config.load();
+        settingsRegistry.setConfiguration(config);
+        settingsRegistry.save(); // Save default values to disk
+    }
     //#endif
 
     public KeyBindingRegistry getKeyBindingRegistry() {
@@ -227,7 +227,7 @@ public class ReplayMod implements
 
     public Path getReplayFolder() throws IOException {
         String str = getSettingsRegistry().get(Setting.RECORDING_PATH);
-        return Files.createDirectories(getMinecraft().runDirectory.toPath().resolve(str));
+        return Files.createDirectories(getMinecraft().mcDataDir.toPath().resolve(str));
     }
 
     /**
@@ -251,7 +251,7 @@ public class ReplayMod implements
      */
     public Path getCacheFolder() throws IOException {
         String str = getSettingsRegistry().get(Setting.CACHE_PATH);
-        Path path = getMinecraft().runDirectory.toPath().resolve(str);
+        Path path = getMinecraft().mcDataDir.toPath().resolve(str);
         Files.createDirectories(path);
         try {
             Files.setAttribute(path, "dos:hidden", true);
@@ -275,38 +275,38 @@ public class ReplayMod implements
         return replayFolder.resolve(relative);
     }
 
-    public static final DirectoryResourcePack jGuiResourcePack;
+    public static final FolderResourcePack jGuiResourcePack;
     public static final String JGUI_RESOURCE_PACK_NAME = "replaymod_jgui";
     static { // Note: even preInit is too late and we'd have to issue another resource reload
         jGuiResourcePack = initJGuiResourcePack();
     }
 
-    private static DirectoryResourcePack initJGuiResourcePack() {
+    private static FolderResourcePack initJGuiResourcePack() {
         File folder = new File("../jGui/src/main/resources");
         if (!folder.exists()) {
             return null;
         }
         //noinspection UnnecessaryLocalVariable
-        DirectoryResourcePack jGuiResourcePack = new DirectoryResourcePack(folder) {
+        FolderResourcePack jGuiResourcePack = new FolderResourcePack(folder) {
             @Override
             //#if MC>=11400
-            public String getName() {
+            //$$ public String getName() {
             //#else
-            //$$ public String getPackName() {
+            public String getPackName() {
             //#endif
                 return JGUI_RESOURCE_PACK_NAME;
             }
 
             @Override
-            protected InputStream openFile(String resourceName) throws IOException {
+            protected InputStream getInputStreamByName(String resourceName) throws IOException {
                 try {
-                    return super.openFile(resourceName);
+                    return super.getInputStreamByName(resourceName);
                 } catch (IOException e) {
                     if ("pack.mcmeta".equals(resourceName)) {
                         //#if MC>=11400
-                        int version = 4;
+                        //$$ int version = 4;
                         //#else
-                        //$$ int version = 1;
+                        int version = 1;
                         //#endif
                         return new ByteArrayInputStream(("{\"pack\": {\"description\": \"dummy pack for jGui resources in dev-env\", \"pack_format\": "
                                 + version + "}}").getBytes(StandardCharsets.UTF_8));
@@ -317,9 +317,9 @@ public class ReplayMod implements
         };
 
         //#if MC<=11202
-        //$$ @SuppressWarnings("unchecked")
-        //$$ List<IResourcePack> defaultResourcePacks = ((MinecraftAccessor) mc).getDefaultResourcePacks();
-        //$$ defaultResourcePacks.add(jGuiResourcePack);
+        @SuppressWarnings("unchecked")
+        List<IResourcePack> defaultResourcePacks = ((MinecraftAccessor) mc).getDefaultResourcePacks();
+        defaultResourcePacks.add(jGuiResourcePack);
         //#endif
 
         //#if MC<=10710
@@ -343,12 +343,12 @@ public class ReplayMod implements
     }
 
     //#if FABRIC>=1
-    @Override
-    public void onInitializeClient() {
-        modules.forEach(Module::initCommon);
-        modules.forEach(Module::initClient);
-        modules.forEach(m -> m.registerKeyBindings(keyBindingRegistry));
-    }
+    //$$ @Override
+    //$$ public void onInitializeClient() {
+    //$$     modules.forEach(Module::initCommon);
+    //$$     modules.forEach(Module::initClient);
+    //$$     modules.forEach(m -> m.registerKeyBindings(keyBindingRegistry));
+    //$$ }
     //#else
     //#if MC>=11400
     //$$ {
@@ -357,12 +357,12 @@ public class ReplayMod implements
     //$$     FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLClientSetupEvent event) -> modules.forEach(m -> m.registerKeyBindings(keyBindingRegistry)));
     //$$ }
     //#else
-    //$$ @EventHandler
-    //$$ public void init(FMLInitializationEvent event) {
-    //$$    modules.forEach(Module::initCommon);
-    //$$    modules.forEach(Module::initClient);
-    //$$    modules.forEach(m -> m.registerKeyBindings(keyBindingRegistry));
-    //$$ }
+    @EventHandler
+    public void init(FMLInitializationEvent event) {
+       modules.forEach(Module::initCommon);
+       modules.forEach(Module::initClient);
+       modules.forEach(m -> m.registerKeyBindings(keyBindingRegistry));
+    }
     //#endif
     //#endif
 
@@ -386,9 +386,9 @@ public class ReplayMod implements
         //#if MC>=10800
         if (!MCVer.hasOptifine()) {
             //#if MC>=11400
-            Option.RENDER_DISTANCE.setMax(64f);
+            //$$ AbstractOption.RENDER_DISTANCE.func_216728_a(64f);
             //#else
-            //$$ GameSettings.Options.RENDER_DISTANCE.setValueMax(64f);
+            GameSettings.Options.RENDER_DISTANCE.setValueMax(64f);
             //#endif
         }
         //#endif
@@ -498,22 +498,22 @@ public class ReplayMod implements
      */
     public void runSync(Runnable runnable) throws InterruptedException, ExecutionException, TimeoutException {
         //#if MC>=11400
-        if (mc.isOnThread()) {
-            runnable.run();
-        } else {
-            executor.submit(() -> {
-                runnable.run();
-                return null;
-            }).get(30, TimeUnit.SECONDS);
-        }
-        //#else
-        //$$ if (mc.isCallingFromMinecraftThread()) {
+        //$$ if (mc.isOnExecutionThread()) {
         //$$     runnable.run();
         //$$ } else {
-        //$$     FutureTask<Void> future = new FutureTask<>(runnable, null);
-        //$$     runLater(future);
-        //$$     future.get(30, TimeUnit.SECONDS);
+        //$$     executor.supplyAsync(() -> {
+        //$$         runnable.run();
+        //$$         return null;
+        //$$     }).get(30, TimeUnit.SECONDS);
         //$$ }
+        //#else
+        if (mc.isCallingFromMinecraftThread()) {
+            runnable.run();
+        } else {
+            FutureTask<Void> future = new FutureTask<>(runnable, null);
+            runLater(future);
+            future.get(30, TimeUnit.SECONDS);
+        }
         //#endif
     }
 
@@ -527,11 +527,11 @@ public class ReplayMod implements
             @Override
             public void run() {
                 //#if MC>=11400
-                if (getMinecraft().overlay != null) {
-                    // delay until after resources have been loaded
-                    runLater(this);
-                    return;
-                }
+                //$$ if (getMinecraft().loadingGui != null) {
+                //$$     // delay until after resources have been loaded
+                //$$     runLater(this);
+                //$$     return;
+                //$$ }
                 //#endif
                 runnable.run();
             }
@@ -545,45 +545,45 @@ public class ReplayMod implements
      */
     private boolean inRunLater = false;
     //#if MC>=11400
-    private boolean inRenderTaskQueue = false;
-    // Starting 1.14 MC clears the queue of scheduled tasks on disconnect.
-    // This works fine for MC since it uses the queue only for packet handling but breaks our assumption that
-    // stuff submitted via runLater is actually always run (e.g. recording might not be fully stopped because parts
-    // of that are run via runLater and stopping the recording happens right around the time MC clears the queue).
-    // Luckily, that's also the version where MC pulled out the executor implementation, so we can just spin up our own.
-    public static class ReplayModExecutor extends ReentrantThreadExecutor<Runnable> {
-        private final Thread mcThread = Thread.currentThread();
-        // Fail-fast in case we ever switch to async loading and forget to change this
-        // (except for fabric 1.15+ because it loads the mod before the client thread is set)
+    //$$ private boolean inRenderTaskQueue = false;
+    //$$ // Starting 1.14 MC clears the queue of scheduled tasks on disconnect.
+    //$$ // This works fine for MC since it uses the queue only for packet handling but breaks our assumption that
+    //$$ // stuff submitted via runLater is actually always run (e.g. recording might not be fully stopped because parts
+    //$$ // of that are run via runLater and stopping the recording happens right around the time MC clears the queue).
+    //$$ // Luckily, that's also the version where MC pulled out the executor implementation, so we can just spin up our own.
+    //$$ public static class ReplayModExecutor extends RecursiveEventLoop<Runnable> {
+    //$$     private final Thread mcThread = Thread.currentThread();
+    //$$     // Fail-fast in case we ever switch to async loading and forget to change this
+    //$$     // (except for fabric 1.15+ because it loads the mod before the client thread is set)
         //#if FABRIC<1 || MC<11500
-        //$$ { if (!MinecraftClient.getInstance().isOnThread()) throw new RuntimeException(); }
+        //$$ { if (!Minecraft.getInstance().isOnExecutionThread()) throw new RuntimeException(); }
         //#endif
-
-        private ReplayModExecutor(String string_1) {
-            super(string_1);
-        }
-
-        @Override
-        protected Runnable createTask(Runnable runnable) {
-            return runnable;
-        }
-
-        @Override
-        protected boolean canExecute(Runnable runnable) {
-            return true;
-        }
-
-        @Override
-        protected Thread getThread() {
-            return mcThread;
-        }
-
-        @Override
-        public void runTasks() {
-            super.runTasks();
-        }
-    }
-    public final ReplayModExecutor executor = new ReplayModExecutor("Client/ReplayMod");
+    //$$
+    //$$     private ReplayModExecutor(String string_1) {
+    //$$         super(string_1);
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     protected Runnable wrapTask(Runnable runnable) {
+    //$$         return runnable;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     protected boolean canRun(Runnable runnable) {
+    //$$         return true;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     protected Thread getExecutionThread() {
+    //$$         return mcThread;
+    //$$     }
+    //$$
+    //$$     @Override
+    //$$     public void drainTasks() {
+    //$$         super.drainTasks();
+    //$$     }
+    //$$ }
+    //$$ public final ReplayModExecutor executor = new ReplayModExecutor("Client/ReplayMod");
     //#endif
 
     // Pre-1.14 MC would hold the lock on the scheduledTasks queue while executing its tasks
@@ -592,10 +592,10 @@ public class ReplayMod implements
     // block all async tasks (e.g. skin loading).
     public void runLaterWithoutLock(Runnable runnable) {
         //#if MC>=11400
-        // MC 1.14+ no longer synchronizes on the queue while running its tasks
-        runLater(runnable);
+        //$$ // MC 1.14+ no longer synchronizes on the queue while running its tasks
+        //$$ runLater(runnable);
         //#else
-        //$$ runLater(() -> runLaterWithoutLock(runnable), runnable);
+        runLater(() -> runLaterWithoutLock(runnable), runnable);
         //#endif
     }
 
@@ -605,55 +605,17 @@ public class ReplayMod implements
 
     private void runLater(Runnable runnable, Runnable defer) {
         //#if MC>=11400
-        if (mc.isOnThread() && inRunLater && !inRenderTaskQueue) {
-            ((MinecraftAccessor) mc).getRenderTaskQueue().offer(() -> {
-                inRenderTaskQueue = true;
-                try {
-                    defer.run();
-                } finally {
-                    inRenderTaskQueue = false;
-                }
-            });
-        } else {
-            executor.send(() -> {
-                inRunLater = true;
-                try {
-                    runnable.run();
-                } catch (CrashException e) {
-                    e.printStackTrace();
-                    System.err.println(e.getReport().asString());
-                    mc.setCrashReport(e.getReport());
-                } finally {
-                    inRunLater = false;
-                }
-            });
-        }
-        //#else
-        //$$ if (mc.isCallingFromMinecraftThread() && inRunLater) {
-            //#if MC>=10800
-            //$$ FML_BUS.register(new Object() {
-            //$$     @SubscribeEvent
-            //$$     public void onRenderTick(TickEvent.RenderTickEvent event) {
-            //$$         if (event.phase == TickEvent.Phase.START) {
-            //$$             FML_BUS.unregister(this);
-            //$$             defer.run();
-            //$$         }
-            //$$     }
-            //$$ });
-            //#else
-            //$$ FML_BUS.register(new RunLaterHelper(defer));
-            //#endif
-        //$$     return;
-        //$$ }
-        //#if MC>=10800
-        //$$ Queue<FutureTask<?>> tasks = ((MinecraftAccessor) mc).getScheduledTasks();
-        //$$ //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        //$$ synchronized (tasks) {
-        //#else
-        //$$ Queue<ListenableFutureTask<?>> tasks = scheduledTasks;
-        //$$ synchronized (scheduledTasks) {
-        //#endif
-        //$$     tasks.add(ListenableFutureTask.create(() -> {
+        //$$ if (mc.isOnExecutionThread() && inRunLater && !inRenderTaskQueue) {
+        //$$     ((MinecraftAccessor) mc).getRenderTaskQueue().offer(() -> {
+        //$$         inRenderTaskQueue = true;
+        //$$         try {
+        //$$             defer.run();
+        //$$         } finally {
+        //$$             inRenderTaskQueue = false;
+        //$$         }
+        //$$     });
+        //$$ } else {
+        //$$     executor.enqueue(() -> {
         //$$         inRunLater = true;
         //$$         try {
         //$$             runnable.run();
@@ -664,8 +626,46 @@ public class ReplayMod implements
         //$$         } finally {
         //$$             inRunLater = false;
         //$$         }
-        //$$     }, null));
+        //$$     });
         //$$ }
+        //#else
+        if (mc.isCallingFromMinecraftThread() && inRunLater) {
+            //#if MC>=10800
+            FML_BUS.register(new Object() {
+                @SubscribeEvent
+                public void onRenderTick(TickEvent.RenderTickEvent event) {
+                    if (event.phase == TickEvent.Phase.START) {
+                        FML_BUS.unregister(this);
+                        defer.run();
+                    }
+                }
+            });
+            //#else
+            //$$ FML_BUS.register(new RunLaterHelper(defer));
+            //#endif
+            return;
+        }
+        //#if MC>=10800
+        Queue<FutureTask<?>> tasks = ((MinecraftAccessor) mc).getScheduledTasks();
+        //noinspection SynchronizationOnLocalVariableOrMethodParameter
+        synchronized (tasks) {
+        //#else
+        //$$ Queue<ListenableFutureTask<?>> tasks = scheduledTasks;
+        //$$ synchronized (scheduledTasks) {
+        //#endif
+            tasks.add(ListenableFutureTask.create(() -> {
+                inRunLater = true;
+                try {
+                    runnable.run();
+                } catch (ReportedException e) {
+                    e.printStackTrace();
+                    System.err.println(e.getCrashReport().getCompleteReport());
+                    mc.crashed(e.getCrashReport());
+                } finally {
+                    inRunLater = false;
+                }
+            }, null));
+        }
         //#endif
     }
 
@@ -702,14 +702,14 @@ public class ReplayMod implements
 
     public String getVersion() {
         //#if FABRIC>=1
-        return FabricLoader.getInstance().getModContainer(MOD_ID)
-                .orElseThrow(IllegalStateException::new)
-                .getMetadata().getVersion().toString();
+        //$$ return FabricLoader.getInstance().getModContainer(MOD_ID)
+        //$$         .orElseThrow(IllegalStateException::new)
+        //$$         .getMetadata().getVersion().toString();
         //#else
         //#if MC>=11400
         //$$ return ModList.get().getModContainerById(MOD_ID).get().getModInfo().getVersion().toString();
         //#else
-        //$$ return Loader.instance().getIndexedModList().get(MOD_ID).getVersion();
+        return Loader.instance().getIndexedModList().get(MOD_ID).getVersion();
         //#endif
         //#endif
     }
@@ -720,7 +720,7 @@ public class ReplayMod implements
         }
     }
 
-    public MinecraftClient getMinecraft() {
+    public Minecraft getMinecraft() {
         return mc;
     }
 
@@ -741,26 +741,26 @@ public class ReplayMod implements
             //$$ Style coloredGold = Style.EMPTY.withColor(Formatting.GOLD);
             //$$ Style alert = Style.EMPTY.withColor(warning ? Formatting.RED : Formatting.DARK_GREEN);
             //#else
-            Style coloredDarkGray = new Style().setColor(Formatting.DARK_GRAY);
-            Style coloredGold = new Style().setColor(Formatting.GOLD);
-            Style alert = new Style().setColor(warning ? Formatting.RED : Formatting.DARK_GREEN);
+            //$$ Style coloredDarkGray = new Style().setColor(TextFormatting.DARK_GRAY);
+            //$$ Style coloredGold = new Style().setColor(TextFormatting.GOLD);
+            //$$ Style alert = new Style().setColor(warning ? TextFormatting.RED : TextFormatting.DARK_GREEN);
             //#endif
-            Text text = new LiteralText("[").setStyle(coloredDarkGray)
-                    .append(new TranslatableText("replaymod.title").setStyle(coloredGold))
-                    .append(new LiteralText("] "))
-                    .append(new TranslatableText(message, args).setStyle(alert));
+            //$$ ITextComponent text = new TextComponentString("[").setStyle(coloredDarkGray)
+            //$$         .appendSibling(new TextComponentTranslation("replaymod.title").setStyle(coloredGold))
+            //$$         .appendSibling(new TextComponentString("] "))
+            //$$         .appendSibling(new TextComponentTranslation(message, args).setStyle(alert));
             //#else
-            //$$ ChatStyle coloredDarkGray = new ChatStyle().setColor(EnumChatFormatting.DARK_GRAY);
-            //$$ ChatStyle coloredGold = new ChatStyle().setColor(EnumChatFormatting.GOLD);
-            //$$ IChatComponent text = new ChatComponentText("[").setChatStyle(coloredDarkGray)
-            //$$         .appendSibling(new ChatComponentTranslation("replaymod.title").setChatStyle(coloredGold))
-            //$$         .appendSibling(new ChatComponentText("] "))
-            //$$         .appendSibling(new ChatComponentTranslation(message, args).setChatStyle(new ChatStyle()
-            //$$                 .setColor(warning ? EnumChatFormatting.RED : EnumChatFormatting.DARK_GREEN)));
+            ChatStyle coloredDarkGray = new ChatStyle().setColor(EnumChatFormatting.DARK_GRAY);
+            ChatStyle coloredGold = new ChatStyle().setColor(EnumChatFormatting.GOLD);
+            IChatComponent text = new ChatComponentText("[").setChatStyle(coloredDarkGray)
+                    .appendSibling(new ChatComponentTranslation("replaymod.title").setChatStyle(coloredGold))
+                    .appendSibling(new ChatComponentText("] "))
+                    .appendSibling(new ChatComponentTranslation(message, args).setChatStyle(new ChatStyle()
+                            .setColor(warning ? EnumChatFormatting.RED : EnumChatFormatting.DARK_GREEN)));
             //#endif
             // Send message to chat GUI
             // The ingame GUI is initialized at startup, therefore this is possible before the client is connected
-            mc.inGameHud.getChatHud().addMessage(text);
+            mc.ingameGUI.getChatGUI().printChatMessage(text);
         }
     }
 
