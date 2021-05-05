@@ -436,7 +436,7 @@ task shadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar)
         }
     }
     dependsOn { FABRIC ? jGui.tasks.remapJar : (mcVersion >= 10800 ? jGui.tasks.reobfJar : jGui.tasks.reobf) }
-    relocate 'de.johni0702', 'com.replaymod.lib.de.johni0702'
+//    relocate 'de.johni0702', 'com.replaymod.lib.de.johni0702'
 
     manifest.inheritFrom tasks.jar.manifest
 
@@ -445,13 +445,13 @@ task shadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar)
     exclude 'META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class'
 
     dependsOn tasks.configureRelocation
-    inputs.file(configureRelocationOutput)
-    doFirst {
-        configureRelocationOutput.readLines().each { pkg ->
-            def pkgName = pkg.replace('/', '.')
-            relocate pkgName, 'com.replaymod.lib.' + pkgName
-        }
-    }
+//    inputs.file(configureRelocationOutput)
+//    doFirst {
+//        configureRelocationOutput.readLines().each { pkg ->
+//            def pkgName = pkg.replace('/', '.')
+//            relocate pkgName, 'com.replaymod.lib.' + pkgName
+//        }
+//    }
 
     // No need to shadow netty, MC provides it
     // (actually, pre-1.12 ships a netty which is too old, so we need to shade it there anyway)
